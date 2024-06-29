@@ -35,6 +35,10 @@
       {
         "command": "vscode-links.activate",
         "title": "VSCode Links: Activate Extension"
+      },
+      {
+        "command": "vscode-links.createConfig",
+        "title": "VSCode Links: Create config file in the current workspace"
       }
     ]
   },

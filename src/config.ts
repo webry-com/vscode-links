@@ -31,7 +31,7 @@ const customLinksConfigSchema = z.object({
   ),
 })
 
-type CustomLinksConfig = z.infer<typeof customLinksConfigSchema>
+export type CustomLinksConfig = z.infer<typeof customLinksConfigSchema>
 
 const workspaceConfigs = new Map<string, CustomLinksConfig>()
 export async function setupConfigWatcher(context: vscode.ExtensionContext) {
