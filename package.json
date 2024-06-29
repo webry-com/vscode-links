@@ -1,0 +1,64 @@
+{
+  "name": "vscode-links",
+  "displayName": "VSCode Links",
+  "description": "Create custom links based on patterns.",
+  "author": "Samuel Braun <sam@webry.com>",
+  "license": "MIT",
+  "version": "0.0.1",
+  "homepage": "https://github.com/webry-com/vscode-links",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:vscode-links.config.js",
+    "workspaceContains:vscode-links.config.mjs"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-links.activate",
+        "title": "VSCode Links: Activate Extension"
+      }
+    ]
+  },
+  "capabilities": {
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Using VSCode Links is not possible in virtual workspaces."
+    },
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "VSCode Links requires workspace trust because it loads configuration files and code from the workspace and executes it."
+    }
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.90.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "@vscode/test-cli": "^0.0.8",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.57.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "minimatch": "^9.0.5",
+    "zod": "^3.23.8"
+  }
+}
