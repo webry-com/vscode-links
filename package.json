@@ -3,6 +3,7 @@
   "displayName": "VSCode Links",
   "description": "Create custom links based on patterns.",
   "author": "Samuel Braun <sam@webry.com>",
+  "publisher": "web-dev-sam",
   "license": "GPL-3.0-only",
   "version": "0.0.1",
   "homepage": "https://github.com/webry-com/vscode-links#readme",
