@@ -92,3 +92,6 @@ export default {
 // Clickable: "git#123"
 // Opens: https://github.com/webry-com/vscode-links/issues/123
 ```
+
+## Contribute
+Feel free to open an issue or PR.
