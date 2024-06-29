@@ -3,18 +3,30 @@
   "displayName": "VSCode Links",
   "description": "Create custom links based on patterns.",
   "author": "Samuel Braun <sam@webry.com>",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "version": "0.0.1",
-  "homepage": "https://github.com/webry-com/vscode-links",
+  "homepage": "https://github.com/webry-com/vscode-links#readme",
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
     "Other"
   ],
+  "bugs": {
+    "email": "sam@webry.com",
+    "url": "https://github.com/webry-com/vscode-links/issues"
+  },
+  "keywords": [
+    "links",
+    "tool",
+    "url"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webry-com/vscode-links"
+  },
   "activationEvents": [
-    "workspaceContains:vscode-links.config.js",
-    "workspaceContains:vscode-links.config.mjs"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
