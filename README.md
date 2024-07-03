@@ -4,6 +4,7 @@
 
 - Install the extention
 - You need to be in a workspace
+- `npm i -D vscode-links-cli`
 - Create a config file `Ctrl+Shift+P` -> `VSCode Links: Create Config`
 
 ## Config
