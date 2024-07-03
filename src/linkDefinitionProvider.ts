@@ -1,91 +1,59 @@
 import * as vscode from "vscode"
-import { getWorkspaceConfig } from "./config"
+import { findConfigFile } from "./config"
+import { exec } from "child_process"
+import { promisify } from "util"
 import path from "path"
-import { minimatch } from "minimatch"
-import { z } from "zod"
+
+const execAsync = promisify(exec)
 
 export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
   constructor() {}
 
-  public provideDocumentLinks(document: vscode.TextDocument): vscode.ProviderResult<vscode.DocumentLink[]> {
+  public async provideDocumentLinks(document: vscode.TextDocument) {
     const workspace = vscode.workspace.getWorkspaceFolder(document.uri)
     if (!workspace) {
       return null
     }
 
-    const basePath = workspace.uri.fsPath
-    const config = getWorkspaceConfig(basePath)
+    const workspacePath = workspace.uri.fsPath
+    const config = findConfigFile(workspacePath)
     if (config == null) {
       return null
     }
 
-    const links = [] as vscode.DocumentLink[]
-    for (const link of config.links) {
-      const include = typeof link.include === "string" ? [link.include] : link.include
-      const exclude = typeof link.exclude === "string" ? [link.exclude] : link.exclude
-      const relativePath = path.relative(basePath, document.uri.fsPath).replace(/\\/g, "/")
-      const isIncluded = include.length && include.some((pattern) => minimatch(relativePath, pattern))
-      const isExcluded = exclude && exclude.length && exclude.some((pattern) => minimatch(relativePath, pattern))
-      if (!isIncluded || isExcluded) {
-        continue
-      }
-
-      if ("pattern" in link) {
-        const regExs = link.pattern instanceof RegExp ? [link.pattern] : link.pattern
-        if (!regExs || regExs.length === 0) {
-          continue
-        }
-
-        const text = document.getText()
-        for (const regEx of regExs) {
-          let match: RegExpExecArray | null
-          while ((match = regEx.exec(text))) {
-            const range = {
-              start: document.positionAt(match.index),
-              end: document.positionAt(match.index + match[0].length),
-            }
-
-            if (match.groups && "link" in match.groups) {
-              const linkText = match.groups.link
-              range.start = document.positionAt(match.index + match[0].indexOf(linkText))
-              range.end = document.positionAt(match.index + match[0].indexOf(linkText) + linkText.length)
-            }
-
-            const vscRange = new vscode.Range(range.start, range.end)
-            const linkText = document.getText(vscRange)
-            const handleReturnSchema = z.object({
-              target: z.string(),
-              tooltip: z.string().optional(),
-            })
-            const result = link.handle({
-              linkText,
-              filePath: document.uri.path,
-              workspacePath: workspace.uri.path,
-              workspaceFile: (path: string) => {
-                return `file://${workspace.uri.path}/${path}`.replace(/\\/g, "/")
-              },
-              file: (path: string) => {
-                return `file://${path}`.replace(/\\/g, "/")
-              },
-            })
-            const parsedResult = handleReturnSchema.safeParse(result)
-            if (!parsedResult.success) {
-              vscode.window.showWarningMessage(
-                "VSCode Links: The link handler function must return an object with a target.",
-              )
-              return
-            }
-
-            const { target, tooltip } = parsedResult.data
-            links.push({
-              range: vscRange,
-              target: vscode.Uri.parse(target ?? ""),
-              tooltip: tooltip ?? "",
-            })
-          }
-        }
-      }
+    const relativeFilePath = path.relative(workspace.uri.fsPath, document.uri.fsPath).replace(/\\/g, "/")
+    const result = await runCli(workspacePath, ["run", "-c", config.name, "-f", relativeFilePath])
+    if (result == null) {
+      return null
     }
-    return links
+
+    try {
+      const links = JSON.parse(result.trim())
+      console.log("[VSCode Links] Provided Links: ", links)
+
+      return links.map((link: any) => {
+        link.range = new vscode.Range(document.positionAt(link.range[0]), document.positionAt(link.range[1]))
+        link.target = vscode.Uri.parse(link.target)
+        return link
+      })
+    } catch (error) {
+      console.error(error)
+    }
+
+    return null
+  }
+}
+
+async function runCli(workspacePath: string, args: string[]): Promise<string | null> {
+  const command = `npx vscode-links-cli ${args.join(" ")}`
+  try {
+    const { stdout, stderr } = await execAsync(command, { cwd: workspacePath })
+    if (stderr) {
+      throw new Error(stderr)
+    }
+    return stdout.trim()
+  } catch (error) {
+    console.error(error)
+    return null
   }
 }
