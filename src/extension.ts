@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import fs from "fs"
-import { LinkDefinitionProvider } from "./linkDefinitionProvider"
+import { LinkDefinitionProvider } from "./LinkDefinitionProvider"
 import path from "path"
 
 /**
