@@ -8,6 +8,12 @@
 - Create a config file `Ctrl+Shift+P` -> `VSCode Links: Create Config`
 - Either add `type: "module"` in your package.json if not already, or rename the config file to `vsc-links.config.mjs`.
 
+## Debugging your config
+
+- Open the output panel
+- Select `VSCode Links` from the dropdown
+- Errors will be shown here
+
 ## Config
 
 ### `links`
