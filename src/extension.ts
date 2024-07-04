@@ -7,7 +7,12 @@ import path from "path"
  * TODO: Custom search function
  */
 
+let outputChannel: vscode.OutputChannel
+
 export function activate(context: vscode.ExtensionContext) {
+  outputChannel = vscode.window.createOutputChannel("VSCode Links")
+
+  context.subscriptions.push(outputChannel)
   context.subscriptions.push(
     vscode.commands.registerCommand("vscode-links.createConfig", async () => {
       const workspaceFolders = vscode.workspace.workspaceFolders ?? []
@@ -52,6 +57,13 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+export function vscLog(logLevel: "Error" | "Warn" | "Info", message: string) {
+  const timestamp = new Date().toLocaleTimeString("de-DE")
+  const logMessage = `[${timestamp}] [${logLevel}] ${message}`
+
+  outputChannel.appendLine(logMessage)
+}
 
 function getDefaultWorkspaceConfig(): string {
   return `

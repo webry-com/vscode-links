@@ -2,6 +2,7 @@ import * as vscode from "vscode"
 import { findConfigFile } from "./config"
 import crossSpawn from "cross-spawn"
 import path from "path"
+import { vscLog } from "./extension"
 
 export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
   constructor() {}
@@ -15,6 +16,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
     const workspacePath = workspace.uri.fsPath
     const config = findConfigFile(workspacePath)
     if (config == null) {
+      vscLog("Error", `No config file found in workspace "${workspace.name}"`)
       return null
     }
 
@@ -22,12 +24,13 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
     const content = document.getText()
     const result = await runCli(workspacePath, ["run", "-c", config.name, "-f", relativeFilePath], content)
     if (result == null) {
+      vscLog("Error", `Links CLI Failed, see above.`)
       return null
     }
 
     try {
       const links = JSON.parse(result)
-      console.log("[VSCode Links] Provided Links: ", links)
+      vscLog("Info", `Created ${links.length} Links!`)
 
       return links.map((link: any) => {
         link.range = new vscode.Range(document.positionAt(link.range[0]), document.positionAt(link.range[1]))
@@ -35,7 +38,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
         return link
       })
     } catch (error) {
-      console.error(error)
+      vscLog("Error", `CLI produced unexpected results: ${error}`)
     }
 
     return null
@@ -43,7 +46,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
 }
 
 function runCli(workspacePath: string, args: string[], content: string): Promise<string | null> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // const linkedPath = path.join("XXX\\Desktop\\vscode-links-cli\\build\\main\\cli.js")
     const cliPath = path.join(workspacePath, "node_modules", "vscode-links-cli", "build", "module", "cli.js")
     const cliProcess = crossSpawn("node", [cliPath, ...args], {
@@ -63,17 +66,18 @@ function runCli(workspacePath: string, args: string[], content: string): Promise
       errorOutput += data.toString()
     })
 
-    cliProcess.on("error", (error) => {
-      console.error(error)
-      reject(error)
+    cliProcess.on("Error", (error) => {
+      vscLog("Error", `CLI process error (node ${[cliPath, ...args].join(" ")}): ${error}`)
     })
 
     cliProcess.on("close", (code) => {
       if (code === 0) {
         resolve(output.trim())
+        vscLog("Info", `CLI process "node ${[cliPath, ...args].join(" ")}" succeeded`)
       } else {
-        console.error(`CLI process exited with code ${code}`)
-        console.error(`Error output: ${errorOutput} ${output}`)
+        vscLog("Error", `CLI process "node ${[cliPath, ...args].join(" ")}" failed (code ${code})`)
+        vscLog("Error", `StdErr: ${errorOutput}`)
+        vscLog("Error", `StdOut: ${output}`)
         resolve(null)
       }
     })
