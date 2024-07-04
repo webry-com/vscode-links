@@ -6,6 +6,7 @@
 - You need to be in a workspace
 - `npm i -D vscode-links-cli`
 - Create a config file `Ctrl+Shift+P` -> `VSCode Links: Create Config`
+- Either add `type: "module"` in your package.json if not already, or rename the config file to `vsc-links.config.mjs`.
 
 ## Config
 
@@ -19,29 +20,8 @@
     - **file**: Function to get the file path based on your path. Example: `file://...` *(Function)*
 
 ## Examples
-```js
-export default {
-    links: [
-        {
-            include: "**/*.js",
-            pattern: /["'`](?<link>api(\..+)+)["'`]/g,
-            handle: ({ linkText, workspaceFile }) => {
-                const parts = linkText.split(".");
-                return {
-                    target: workspaceFile(`${parts.join("/")}.py`),
-                    tooltip: "Go to file.",
-                };
-            },
-        },
-    ],
-};
-```
-```js
-// src/index.js
-// Clickable: "api.X.Y"
-// Opens: api/X/Y.py
-```
----
+
+### Git Issue Links
 ```js
 export default {
     links: [
@@ -60,10 +40,35 @@ export default {
 };
 ```
 ```js
-// src/index.js
 // Clickable: "git#123"
 // Opens: https://github.com/webry-com/vscode-links/issues/123
 ```
+
+### API Methods in Frappe
+```js
+/** @type {import("vscode-links-cli").VSCodeLinksConfig} */
+export default {
+  links: [
+    {
+      include: "**/*",
+      pattern: /["'`](?<link>frappe(\..+)+)["'`]/g,
+      handle: ({ linkText, workspacePath }) => {
+        const parts = linkText.split(".");
+        parts.pop();
+        return {
+          target: `file:///${workspacePath.replace(/\\/g, "/")}/${parts.join("/")}.py`,
+          tooltip: "Go to file.",
+        };
+      },
+    },
+  ],
+};
+```
+```js
+// Clickable: "frappe.folder.folder.file.get_something"
+// Opens: ./frappe/folder/folder/file.py
+```
+
 
 ## Contribute
 Feel free to open an issue or PR.
