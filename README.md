@@ -24,7 +24,24 @@
 - **handle:** Function to handle the link. _(Function)_
   - **linkText:** Text matched by the pattern. _(string)_
   - **workspaceFile:** Function to get the workspace file path based on your relative path. _(Function)_
-  - **file**: Function to get the file path based on your path. Example: `file://...` **(In Windows: `file:///...`)** _(Function)_
+
+## Helpers
+
+- **workspace:** Function to get the workspace file path based on your relative path and os. **Usage:**
+
+```js
+import { file } from "vscode-links-cli"
+
+file`c:/absolute/path/to/file.js`
+```
+
+- **file:** Function to get the file path based on the current file and os. **Usage:**
+
+```js
+import { workspace } from "vscode-links-cli"
+
+workspace`relative/path/to/file.js`
+```
 
 ## Examples
 
@@ -33,7 +50,7 @@
 You could create a config to open git issues in your browser like this:
 
 ```js
-/** @type {import("vscode-links-cli").VSCodeLinksConfig} */
+/** @type {import("vscode-links-cli").Config} */
 export default {
   links: [
     {
@@ -55,17 +72,17 @@ export default {
 Here is a config to open the python file based on an api route in frappe:
 
 ```js
-/** @type {import("vscode-links-cli").VSCodeLinksConfig} */
+/** @type {import("vscode-links-cli").Config} */
 export default {
   links: [
     {
       include: "**/*",
-      pattern: /["'`](?<link>frappe(\..+)+)["'`]/g, // Clickable: "frappe.core.doctype.user.user.get_timezones"
-      handle: ({ linkText, workspacePath }) => {
+      pattern: /["'`](?<link>frappe(\.[^"'`]+)+)["'`]/g, // Clickable: "frappe.core.doctype.user.user.get_timezones"
+      handle: ({ linkText }) => {
         const parts = linkText.split(".")
         const apiName = parts.pop()
         return {
-          target: `file://${workspacePath}/${parts.join("/")}.py`,
+          target: workspace`${parts.join("/")}.py`,
           tooltip: `Open python file for the "${apiName}" API.`,
         }
       },

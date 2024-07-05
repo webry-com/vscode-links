@@ -29,16 +29,24 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
     }
 
     try {
-      const links = JSON.parse(result)
-      vscLog("Info", `Created ${links.length} Links!`)
+      const data = JSON.parse(result)
+      const compatibleData: any = {}
+      if (Array.isArray(data)) {
+        compatibleData.version = "0"
+        compatibleData.links = data
+      } else {
+        Object.assign(compatibleData, data)
+      }
 
-      return links.map((link: any) => {
+      vscLog("Info", `Created ${compatibleData.links.length} Links!`)
+
+      return compatibleData.links.map((link: any) => {
         link.range = new vscode.Range(document.positionAt(link.range[0]), document.positionAt(link.range[1]))
         link.target = vscode.Uri.parse(link.target)
         return link
       })
     } catch (error) {
-      vscLog("Error", `CLI produced unexpected results: ${error}`)
+      vscLog("Error", error as any)
     }
 
     return null
