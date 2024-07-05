@@ -69,7 +69,7 @@ export default {
 
 ### API Methods in Frappe
 
-Here is a config to open the python file based on an api route in frappe:
+Here is a config to open the python file based on an api route in frappe: _(Replace the weird looking question mark in the regex with a normal one, vscode adds the whole github link with the normal syntax)_
 
 ```js
 /** @type {import("vscode-links-cli").Config} */
@@ -77,7 +77,7 @@ export default {
   links: [
     {
       include: "**/*",
-      pattern: /["'`](?<link>frappe(\.[^"'`]+)+)["'`]/g, // Clickable: "frappe.core.doctype.user.user.get_timezones"
+      pattern: /["'`](﹖<link>frappe(\.[^"'`]+)+)["'`]/g, // Clickable: "frappe.core.doctype.user.user.get_timezones"
       handle: ({ linkText }) => {
         const parts = linkText.split(".")
         const apiName = parts.pop()
