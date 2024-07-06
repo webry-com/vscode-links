@@ -5,7 +5,7 @@
   "author": "Samuel Braun <sam@webry.com>",
   "publisher": "web-dev-sam",
   "license": "GPL-3.0-only",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "icon": "icon.png",
   "homepage": "https://github.com/webry-com/vscode-links#readme",
   "engines": {
@@ -66,19 +66,16 @@
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
     "@types/vscode": "^1.90.0",
-    "@types/which": "^3.0.4",
     "@vscode/test-cli": "^0.0.8",
     "@vscode/test-electron": "^2.3.9",
     "esbuild": "^0.21.5",
     "globals": "^15.6.0",
     "prettier": "^3.3.2",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^7.14.1"
+    "typescript-eslint": "^7.14.1",
+    "vscode-links-cli": "^1.1.1"
   },
   "dependencies": {
-    "cross-spawn": "^7.0.3",
-    "minimatch": "^9.0.5",
-    "which": "^4.0.0",
-    "zod": "^3.23.8"
+    "cross-spawn": "^7.0.3"
   }
 }
