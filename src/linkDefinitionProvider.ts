@@ -164,9 +164,9 @@ function getLineAndColumn(
 
 function runCli(workspacePath: string, args: string[], content: string): Promise<string | null> {
   return new Promise((resolve) => {
-    const linkedPath = path.join("C:\\Users\\SBrau\\Desktop\\vscode-links-cli\\build\\main\\cli.js")
+    // const linkedPath = path.join("XXX\\Desktop\\vscode-links-cli\\build\\main\\cli.js")
     const cliPath = path.join(workspacePath, "node_modules", "vscode-links-cli", "build", "module", "cli.js")
-    const cliProcess = crossSpawn("node", [linkedPath, ...args], {
+    const cliProcess = crossSpawn("node", [cliPath, ...args], {
       stdio: ["pipe", "pipe", "pipe"],
       cwd: workspacePath,
       env: { ...process.env },
