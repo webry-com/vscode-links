@@ -100,8 +100,6 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
       }
     }
 
-    console.log("SUCCESS")
-
     try {
       const targetDocument = fs.readFileSync(link._vsclTarget.fsPath, "utf8")
       if (link._jumpPattern.pattern) {
