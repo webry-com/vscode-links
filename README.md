@@ -2,7 +2,7 @@
 
 ## Setup
 
-- Install the extention
+- Install the extension [here](https://marketplace.visualstudio.com/items?itemName=web-dev-sam.vscode-links&ref=producthunt)
 - You need to be in a workspace
 - `npm i -D vscode-links-cli@latest`
 - Create a config file `Ctrl+Shift+P` -> `VSCode Links: Create Config`
