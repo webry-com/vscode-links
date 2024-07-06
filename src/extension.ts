@@ -67,7 +67,7 @@ export function vscLog(logLevel: "Error" | "Warn" | "Info", message: string) {
 
 function getDefaultWorkspaceConfig(): string {
   return `
-/** @type {import("vscode-links-cli").VSCodeLinksConfig} */
+/** @type {import("vscode-links-cli").Config} */
 export default {
   links: [
     {
