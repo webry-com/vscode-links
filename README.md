@@ -23,7 +23,6 @@
 - **pattern:** Regex pattern to match links. Use `(?<link>ClickableText)` to define the clickable area if its different from the whole regex match. _(RegExp)_
 - **handle:** Function to handle the link. _(Function)_
   - **linkText:** Text matched by the pattern. _(string)_
-  - **workspaceFile:** Function to get the workspace file path based on your relative path. _(Function)_
 
 ## Helpers
 
@@ -86,6 +85,7 @@ export default {
         return {
           target: workspace`${parts.join("/")}.py`,
           tooltip: `Open python file for the "${apiName}" API.`,
+          jumpPattern: `def ${apiName}(`, // Jump to the function definition
         }
       },
     },
