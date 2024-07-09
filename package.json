@@ -5,7 +5,7 @@
   "author": "Samuel Braun <sam@webry.com>",
   "publisher": "web-dev-sam",
   "license": "GPL-3.0-only",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "icon": "icon.png",
   "homepage": "https://github.com/webry-com/vscode-links#readme",
   "engines": {
@@ -36,6 +36,10 @@
       {
         "command": "vscode-links.createConfig",
         "title": "VSCode Links: Create config file in the current workspace"
+      },
+      {
+        "command": "vscode-links.testVSCodeImport",
+        "title": "VSCL Dev: Test VSCode Import"
       }
     ]
   },
@@ -76,6 +80,7 @@
     "vscode-links-cli": "^1.1.1"
   },
   "dependencies": {
+    "c12": "^1.11.1",
     "cross-spawn": "^7.0.3"
   }
 }
