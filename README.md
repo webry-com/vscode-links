@@ -2,16 +2,16 @@
 
 ## Setup
 
-- Install the extension [here](https://marketplace.visualstudio.com/items?itemName=web-dev-sam.vscode-links&ref=producthunt)
-- `npm i -D vscode-links-cli@latest`
-- Create a config file `Ctrl+Shift+P` -> `VSCode Links: Create Config`
-- Either add `type: "module"` in your package.json if not already, or rename the config file to `vsc-links.config.mjs`.
+- Install the extension [here](https://marketplace.visualstudio.com/items?itemName=web-dev-sam.vscode-links)
+- Create a config file `Ctrl+Shift+P` -> `VSC Links: Create Config File`
+- _Optional_ `npm i -D vscl@latest` (Adds typings for easier config editing)
 
 ## Debugging your config
 
 - Open the output panel
 - Select `VSCode Links` from the dropdown
 - Errors will be shown here
+- If the links dont work/update, try `Ctrl+Shift+P` -> `VSC Links: Restart` _(can happen when renaming/moving config file)_
 
 ## Config
 
@@ -22,24 +22,8 @@
 - **pattern:** Regex pattern to match links. Use `(?<link>ClickableText)` to define the clickable area if its different from the whole regex match. _(RegExp)_
 - **handle:** Function to handle the link. _(Function)_
   - **linkText:** Text matched by the pattern. _(string)_
-
-## Helpers
-
-- **workspace:** Function to get the workspace file path based on your relative path and os. **Usage:**
-
-```js
-import { file } from "vscode-links-cli"
-
-file`c:/absolute/path/to/file.js`
-```
-
-- **file:** Function to get the file path based on the current file and os. **Usage:**
-
-```js
-import { workspace } from "vscode-links-cli"
-
-workspace`relative/path/to/file.js`
-```
+  - **file:** Template literal tag to get the file path based on the current file and os.
+  - **workspace:** Template literal tag to get the workspace file path based on your relative path and os.
 
 ## Examples
 
@@ -48,7 +32,8 @@ workspace`relative/path/to/file.js`
 You could create a config to open git issues in your browser like this:
 
 ```js
-/** @type {import("vscode-links-cli").Config} */
+import { type Config } from "vscl"
+
 export default {
   links: [
     {
@@ -62,7 +47,7 @@ export default {
       },
     },
   ],
-}
+} satisfies Config;
 ```
 
 ### API Methods in Frappe
@@ -70,15 +55,14 @@ export default {
 Here is a config to open the python file based on an api route in frappe:
 
 ```js
-import { workspace } from "vscode-links-cli"
+import { type Config } from "vscl"
 
-/** @type {import("vscode-links-cli").Config} */
 export default {
   links: [
     {
-      include: "**/*",
+      include: "*",
       pattern: /"(?<link>frappe(\.[^"'`]+)+)"/g, // Clickable: "frappe.core.doctype.user.user.get_timezones"
-      handle: ({ linkText }) => {
+      handle: ({ linkText, workspace }) => {
         const parts = linkText.split(".")
         const apiName = parts.pop()
         return {
@@ -89,7 +73,7 @@ export default {
       },
     },
   ],
-}
+} satisfies Config;
 ```
 
 ## Contribute

@@ -1,47 +1,57 @@
 import * as vscode from "vscode"
 import fs from "fs"
-import { LinkDefinitionProvider } from "./LinkDefinitionProvider"
 import path from "path"
-import { loadConfig } from "c12"
 
-/**
- * TODO: Custom search function
- */
+import { registerOutputChannel } from "./utils/output"
+import { ConfigType, createBaseConfig } from "./utils/defaults"
+import { askWorkspace } from "./utils/vscode"
+import { createLinkProvider, disposeAllLinkProviders } from "./utils/linkProvider"
+import { createConfigWatchers, disposeConfigWatchers } from "./utils/watchers"
 
-let outputChannel: vscode.OutputChannel
+export async function activate(context: vscode.ExtensionContext) {
+  registerOutputChannel(context)
+  createLinkProvider()
+  createConfigWatchers()
 
-export function activate(context: vscode.ExtensionContext) {
-  outputChannel = vscode.window.createOutputChannel("VSCode Links")
+  registerRestartVSCodeLinksCommand(context)
+  registerCreateConfigCommand(context)
+}
 
-  context.subscriptions.push(outputChannel)
+export async function deactivate() {
+  await disposeConfigWatchers()
+  disposeAllLinkProviders()
+}
+
+function registerRestartVSCodeLinksCommand(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("vscode-links.restartVSCodeLinks", async () => {
+      await disposeConfigWatchers()
+      disposeAllLinkProviders()
+      createLinkProvider()
+      createConfigWatchers()
+    }),
+  )
+}
+
+function registerCreateConfigCommand(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("vscode-links.createConfig", async () => {
-      const workspaceFolders = vscode.workspace.workspaceFolders ?? []
-      if (workspaceFolders.length === 0) {
-        vscode.window.showErrorMessage("No workspaces are currently opened.")
-        return
-      }
-
-      const selectedWorkspaceIndex = await vscode.window.showQuickPick(
-        workspaceFolders.map((folder) => folder.name),
-        {
-          placeHolder: "Select a workspace",
-        },
-      )
-
-      if (!selectedWorkspaceIndex) {
-        vscode.window.showInformationMessage("No workspace was selected.")
-        return
-      }
-
-      const selectedWorkspace = workspaceFolders.find((folder) => folder.name === selectedWorkspaceIndex)
+      const selectedWorkspace = await askWorkspace()
       if (!selectedWorkspace) {
-        vscode.window.showErrorMessage("Failed to find the selected workspace.")
         return
       }
 
-      const configContent = getDefaultWorkspaceConfig()
-      const filePath = path.join(selectedWorkspace.uri.fsPath, "vsc-links.config.js")
+      const configTypes: ConfigType[] = [".ts", ".js", ".cjs", ".mjs"] as const
+      const configType = await vscode.window.showQuickPick(configTypes, {
+        placeHolder: "Select a format...",
+      })
+      const isConfigType = (t: any): t is ConfigType => configTypes.includes(t)
+      if (!configType || !isConfigType(configType)) {
+        return
+      }
+
+      const configContent = createBaseConfig(configType)
+      const filePath = path.join(selectedWorkspace.uri.fsPath, "vsc-links.config" + configType)
 
       if (fs.existsSync(filePath)) {
         const document = await vscode.workspace.openTextDocument(filePath)
@@ -53,69 +63,4 @@ export function activate(context: vscode.ExtensionContext) {
       }
     }),
   )
-  context.subscriptions.push(
-    vscode.commands.registerCommand("vscode-links.testVSCodeImport", async () => {
-      const workspaceFolders = vscode.workspace.workspaceFolders ?? []
-      if (workspaceFolders.length === 0) {
-        vscode.window.showErrorMessage("No workspaces are currently opened.")
-        return
-      }
-
-      const selectedWorkspaceIndex = await vscode.window.showQuickPick(
-        workspaceFolders.map((folder) => folder.name),
-        {
-          placeHolder: "Select a workspace",
-        },
-      )
-
-      if (!selectedWorkspaceIndex) {
-        vscode.window.showInformationMessage("No workspace was selected.")
-        return
-      }
-
-      const selectedWorkspace = workspaceFolders.find((folder) => folder.name === selectedWorkspaceIndex)
-      if (!selectedWorkspace) {
-        vscode.window.showErrorMessage("Failed to find the selected workspace.")
-        return
-      }
-
-      const testConfig = await loadConfig({
-        cwd: selectedWorkspace.uri.fsPath,
-        name: "vsc-links",
-      })
-      vscLog("Info", testConfig.config.links.length)
-      vscLog("Info", testConfig.config.links[0].pattern.toString())
-    }),
-  )
-
-  vscode.languages.registerDocumentLinkProvider({ pattern: `**/*` }, new LinkDefinitionProvider())
-}
-
-export function deactivate() {}
-
-export function vscLog(logLevel: "Error" | "Warn" | "Info", message: string) {
-  const timestamp = new Date().toLocaleTimeString("de-DE")
-  const logMessage = `[${timestamp}] [${logLevel}] ${message}`
-
-  outputChannel.appendLine(logMessage)
-}
-
-function getDefaultWorkspaceConfig(): string {
-  return `
-/** @type {import("vscode-links-cli").Config} */
-export default {
-  links: [
-    {
-      include: "**/*",
-      pattern: /vscode-link/g,
-      handle: ({}) => {
-        return {
-          target: "https://github.com/webry-com/vscode-links#readme",
-          tooltip: "Go to VSCode ReadMe.",
-        };
-      },
-    },
-  ],
-};
-  `
 }
