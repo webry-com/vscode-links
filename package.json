@@ -57,15 +57,13 @@
     "workspace"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --minify",
     "watch": "tsc -watch -p ./",
-    "pretest": "pnpm run compile && pnpm run lint",
-    "lint": "eslint src --ext ts",
+    "vscode:prepublish": "npm run compile",
+    "pretest": "npm run compile",
+    "compile": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --minify",
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@eslint/js": "^9.6.0",
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
     "@types/vscode": "^1.90.0",
@@ -74,9 +72,7 @@
     "esbuild": "^0.21.5",
     "globals": "^15.6.0",
     "prettier": "^3.3.2",
-    "typescript": "^5.3.3",
-    "typescript-eslint": "^7.14.1",
-    "vscode-links-cli": "^1.1.1"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "c12": "^1.11.1",
