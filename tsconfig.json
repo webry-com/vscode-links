@@ -13,6 +13,11 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedParameters": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "ohash": [
+        "./ohash-fix.d.ts"
+      ],
+    }
   }
 }

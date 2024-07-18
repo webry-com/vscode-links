@@ -24,8 +24,9 @@ export async function deactivate() {
 
 function registerRestartVSCodeLinksCommand(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.commands.registerCommand("vscode-links.restartVSCodeLinks", () => {
-      deactivate()
+    vscode.commands.registerCommand("vscode-links.restartVSCodeLinks", async () => {
+      await disposeConfigWatchers()
+      disposeAllLinkProviders()
       createLinkProvider()
       createConfigWatchers()
     }),

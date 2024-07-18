@@ -4,12 +4,7 @@ import { showOutputChannel, vscLog } from "./output"
 import { z } from "zod"
 
 const watchers: Map<string, Awaited<ReturnType<typeof watchConfig>>> = new Map()
-const configs: Map<
-  string,
-  ResolvedConfig<UserInputConfig, ConfigLayerMeta> & {
-    config: z.infer<typeof configSchema>
-  }
-> = new Map()
+const configs: Map<string, z.infer<typeof configSchema>> = new Map()
 export const handlerResponseSchema = z.object({
   target: z.string(),
   tooltip: z.string().optional(),
@@ -21,13 +16,19 @@ export const handlerResponseSchema = z.object({
 export const configSchema = z.object({
   links: z.array(
     z.object({
-      include: z.union([z.string(), z.array(z.string())]).optional(),
-      exclude: z.union([z.string(), z.array(z.string())]).optional(),
+      include: z
+        .union([z.string(), z.array(z.string())])
+        .optional()
+        .default("**/*"),
+      exclude: z
+        .union([z.string(), z.array(z.string())])
+        .optional()
+        .default([]),
       pattern: z
         .any()
         .refine(
           (val): val is RegExp | RegExp[] =>
-            val instanceof RegExp || (Array.isArray(val) && val.every((v) => v instanceof RegExp)),
+            val instanceof RegExp || (Array.isArray(val) && val.length > 0 && val.every((v) => v instanceof RegExp)),
         ),
       handle: z
         .function()
@@ -62,12 +63,7 @@ function loadConfig(config: ResolvedConfig<UserInputConfig, ConfigLayerMeta>, wo
     return
   }
 
-  configs.set(
-    workspaceFolder.uri.fsPath,
-    config as ResolvedConfig<UserInputConfig, ConfigLayerMeta> & {
-      config: z.infer<typeof configSchema>
-    },
-  )
+  configs.set(workspaceFolder.uri.fsPath, validationResult.data)
   vscLog("Info", "Config loaded!")
 }
 

@@ -2,6 +2,8 @@ import * as vscode from "vscode"
 import fs from "fs"
 import { vscLog } from "./utils/output"
 import { getConfig, handlerResponseSchema } from "./utils/watchers"
+import path from "path"
+import { minimatch } from "minimatch"
 
 type VSCLDocumentLink = vscode.DocumentLink &
   (
@@ -41,9 +43,18 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
       return null
     }
 
+    const currentFileRelative = path.relative(workspace.uri.fsPath, document.uri.fsPath)
+    config.links = config.links.filter((link) => {
+      const includes = Array.isArray(link.include) ? link.include : [link.include]
+      const excludes = Array.isArray(link.exclude) ? link.exclude : [link.exclude]
+      const isIncluded = includes.some((pattern) => minimatch(currentFileRelative, pattern, { dot: true }))
+      const isExcluded = excludes.some((pattern) => minimatch(currentFileRelative, pattern, { dot: true }))
+      return isIncluded && !isExcluded
+    })
+
     const content = document.getText()
     const links: VSCLDocumentLink[] = []
-    for (const link of config.config.links) {
+    for (const link of config.links) {
       link.pattern = Array.isArray(link.pattern) ? link.pattern : [link.pattern]
       for (const regEx of link.pattern) {
         let match: RegExpExecArray | null
