@@ -31,7 +31,7 @@
 
 You could create a config to open git issues in your browser like this:
 
-```js
+```ts
 import { type Config } from "vscl"
 
 export default {
@@ -47,14 +47,14 @@ export default {
       },
     },
   ],
-} satisfies Config;
+} satisfies Config
 ```
 
 ### API Methods in Frappe
 
 Here is a config to open the python file based on an api route in frappe:
 
-```js
+```ts
 import { type Config } from "vscl"
 
 export default {
@@ -73,7 +73,7 @@ export default {
       },
     },
   ],
-} satisfies Config;
+} satisfies Config
 ```
 
 ## Contribute
