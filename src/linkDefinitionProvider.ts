@@ -1,131 +1,179 @@
 import * as vscode from "vscode"
-import { findConfigFile } from "./config"
-import crossSpawn from "cross-spawn"
-import path from "path"
 import fs from "fs"
-import { vscLog } from "./extension"
+import { vscLog } from "./utils/output"
+import { getConfig, handlerResponseSchema } from "./utils/watchers"
+
+type VSCLDocumentLink = vscode.DocumentLink &
+  (
+    | {
+        range: vscode.Range
+        tooltip?: string
+        _originalVsclTarget?: string
+        _vsclTarget?: vscode.Uri
+        _jumpPattern?: RegExp | string
+      }
+    | {
+        target: vscode.Uri
+        range: vscode.Range
+        tooltip?: string
+      }
+  )
+
+const FILE_PREFIX =
+  (
+    {
+      win32: "file:///",
+    } as Record<string, string>
+  )[process.platform] || "file://"
 
 export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
   constructor() {}
 
-  public async provideDocumentLinks(document: vscode.TextDocument) {
+  provideDocumentLinks(document: vscode.TextDocument): VSCLDocumentLink[] | null {
     const workspace = vscode.workspace.getWorkspaceFolder(document.uri)
     if (!workspace) {
       return null
     }
 
-    const workspacePath = workspace.uri.fsPath
-    const config = findConfigFile(workspacePath)
+    const config = getConfig(workspace)
     if (config == null) {
-      vscLog("Error", `No config file found in workspace "${workspace.name}"`)
+      vscLog("Error", `No valid config loaded in workspace "${workspace.name}"`)
       return null
     }
 
-    const relativeFilePath = path.relative(workspace.uri.fsPath, document.uri.fsPath).replace(/\\/g, "/")
     const content = document.getText()
-    const result = await runCli(workspacePath, ["run", "-c", config.name, "-f", relativeFilePath], content)
-    if (result == null) {
-      vscLog("Error", `Links CLI Failed, see above.`)
-      return null
-    }
-
-    try {
-      const data = JSON.parse(result)
-      const compatibleData: any = {}
-      if (Array.isArray(data)) {
-        compatibleData.version = "0"
-        compatibleData.links = data
-      } else {
-        Object.assign(compatibleData, data)
-      }
-
-      vscLog("Info", `Created ${compatibleData.links.length} Links!`)
-
-      return compatibleData.links.map((link: any) => {
-        const finalLink: vscode.DocumentLink & {
-          _originalVsclTarget: string
-          _vsclTarget: vscode.Uri
-          _jumpPattern: any
-        } = {
-          _originalVsclTarget: link.target,
-          _vsclTarget: vscode.Uri.parse(link.target),
-          range: new vscode.Range(document.positionAt(link.range[0]), document.positionAt(link.range[1])),
-          tooltip: link.tooltip || "",
-          _jumpPattern: link.jumpPattern,
-        }
-
-        // Jumping to a specific line with "jumpPattern"
-        if (finalLink._vsclTarget.scheme === "file" && typeof link.jumpPattern === "object") {
-          const targetDocument = vscode.workspace.textDocuments.find(
-            (doc) => doc.uri.path === finalLink._vsclTarget.path,
-          )
-          if (targetDocument) {
-            if (link.jumpPattern.pattern) {
-              const regex = new RegExp(link.jumpPattern.pattern, link.jumpPattern.flags || "g")
-              const index = targetDocument.getText().search(regex)
-              if (index >= 0) {
-                const position = targetDocument.positionAt(index)
-                finalLink.target = vscode.Uri.parse(`${link.target}#L${position.line + 1}:${position.character + 1}`)
-              }
-            } else if (link.jumpPattern.literal) {
-              const index = targetDocument.getText().indexOf(link.jumpPattern.literal)
-              if (index >= 0) {
-                const position = targetDocument.positionAt(index)
-                finalLink.target = vscode.Uri.parse(`${link.target}#L${position.line + 1}:${position.character + 1}`)
-              }
-            }
-          } else {
-            return finalLink
+    const links: VSCLDocumentLink[] = []
+    for (const link of config.config.links) {
+      link.pattern = Array.isArray(link.pattern) ? link.pattern : [link.pattern]
+      for (const regEx of link.pattern) {
+        let match: RegExpExecArray | null
+        while ((match = regEx.exec(content))) {
+          const range = {
+            start: match.index,
+            end: match.index + match[0].length,
           }
-        } else {
-          finalLink.target = finalLink._vsclTarget
-        }
 
-        return finalLink
-      })
-    } catch (error) {
-      vscLog("Error", error as any)
+          if (match.groups && "link" in match.groups) {
+            const linkText = match.groups.link
+            range.start = match.index + match[0].indexOf(linkText)
+            range.end = match.index + match[0].indexOf(linkText) + linkText.length
+          }
+
+          const linkText = content.substring(range.start, range.end)
+          const result = link.handle({
+            linkText,
+            workspace(strings: TemplateStringsArray, ...values: string[]): string {
+              let builtString = ""
+              strings.forEach((string, i) => {
+                builtString += string + (values[i] || "")
+              })
+              const filePath = `${workspace.uri.fsPath}/${builtString}`.replace(/[\\\/]+/g, "/")
+              return `${FILE_PREFIX}${filePath}`
+            },
+            file(strings: TemplateStringsArray, ...values: string[]): string {
+              let builtString = ""
+              strings.forEach((string, i) => {
+                builtString += string + (values[i] || "")
+              })
+              const filePath = builtString.replace(/[\\\/]+/g, "/")
+              return `${FILE_PREFIX}${filePath}`
+            },
+            log(...logs: any[]) {
+              vscLog("Info", logs.map((log) => log.toString()).join("  "))
+            },
+          })
+
+          const handlerResultValidationResult = handlerResponseSchema.safeParse(result)
+          if (!handlerResultValidationResult.success) {
+            vscLog(
+              "Warn",
+              `Skipping link "${linkText}" in file "${document.fileName}" due to invalid handler response: ${handlerResultValidationResult.error}`,
+            )
+            continue
+          }
+
+          if (result.jumpPattern) {
+            links.push({
+              range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
+              tooltip: result.tooltip || "",
+              _originalVsclTarget: result.target,
+              _vsclTarget: vscode.Uri.parse(result.target),
+              _jumpPattern: result.jumpPattern,
+            })
+          } else {
+            links.push({
+              target: vscode.Uri.parse(result.target),
+              range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
+              tooltip: result.tooltip || "",
+            })
+          }
+        }
+      }
     }
 
-    return null
+    return links
   }
 
   resolveDocumentLink(
-    link: vscode.DocumentLink & { _vsclTarget: vscode.Uri; _jumpPattern: any; _originalVsclTarget: string },
+    link: vscode.DocumentLink & { _vsclTarget: vscode.Uri; _jumpPattern: RegExp | string; _originalVsclTarget: string },
   ): vscode.ProviderResult<vscode.DocumentLink> {
     if (link.target) {
-      return {
-        ...link,
-        target: link._vsclTarget,
-      }
+      return link
     }
 
-    try {
-      const targetDocument = fs.readFileSync(link._vsclTarget.fsPath, "utf8")
-      if (link._jumpPattern.pattern) {
-        const regex = new RegExp(link._jumpPattern.pattern, link._jumpPattern.flags || "g")
-        const index = targetDocument.search(regex)
-        if (index >= 0) {
-          const { line, column } = getLineAndColumn(targetDocument, index)
-          link.target = vscode.Uri.parse(`${link._originalVsclTarget}#L${line}:${column}`)
+    if (link._vsclTarget.scheme === "file") {
+      const targetDocument = vscode.workspace.textDocuments.find((doc) => doc.uri.path === link._vsclTarget.path)
+      if (targetDocument) {
+        if (link._jumpPattern instanceof RegExp) {
+          const index = targetDocument.getText().search(link._jumpPattern)
+          if (index >= 0) {
+            const position = targetDocument.positionAt(index)
+            link.target = vscode.Uri.parse(
+              `${link._originalVsclTarget}#L${position.line + 1}:${position.character + 1}`,
+            )
+          }
+        } else if (link._jumpPattern && typeof link._jumpPattern === "string") {
+          const index = targetDocument.getText().indexOf(link._jumpPattern)
+          if (index >= 0) {
+            const position = targetDocument.positionAt(index)
+            link.target = vscode.Uri.parse(
+              `${link._originalVsclTarget}#L${position.line + 1}:${position.character + 1}`,
+            )
+          }
         }
-      } else if (link._jumpPattern.literal) {
-        const index = targetDocument.indexOf(link._jumpPattern.literal)
-        if (index >= 0) {
-          const { line, column } = getLineAndColumn(targetDocument, index)
-          link.target = vscode.Uri.parse(`${link._originalVsclTarget}#L${line}:${column}`)
+      } else {
+        try {
+          const targetDocumentContent = fs.readFileSync(link._vsclTarget.fsPath, "utf8")
+          if (link._jumpPattern instanceof RegExp) {
+            const index = targetDocumentContent.search(link._jumpPattern)
+            if (index >= 0) {
+              const { line, column } = getLineAndColumn(targetDocumentContent, index)
+              link.target = vscode.Uri.parse(`${link._originalVsclTarget}#L${line}:${column}`)
+            }
+          } else if (link._jumpPattern && typeof link._jumpPattern === "string") {
+            const index = targetDocumentContent.indexOf(link._jumpPattern)
+            if (index >= 0) {
+              const { line, column } = getLineAndColumn(targetDocumentContent, index)
+              link.target = vscode.Uri.parse(`${link._originalVsclTarget}#L${line}:${column}`)
+            }
+          }
+        } catch (error) {
+          vscLog("Error", error)
         }
       }
-    } catch (error) {
-      vscLog("Error", error as any)
     }
 
     if (!link.target) {
-      vscLog("Error", `Could not find linePattern in document: ${link._vsclTarget.path}`)
+      vscLog("Error", `Could not find jumpPattern in document: ${link._vsclTarget.path}`)
       link.target = link._vsclTarget
     }
+    console.log(link)
 
-    return link
+    return {
+      range: link.range,
+      target: link.target,
+      tooltip: link.tooltip,
+    }
   }
 }
 
@@ -160,46 +208,4 @@ function getLineAndColumn(
     line: lineNumber - 1,
     column: lines[lines.length - 1].length + 1,
   }
-}
-
-function runCli(workspacePath: string, args: string[], content: string): Promise<string | null> {
-  return new Promise((resolve) => {
-    // const linkedPath = path.join("XXX\\Desktop\\vscode-links-cli\\build\\main\\cli.js")
-    const cliPath = path.join(workspacePath, "node_modules", "vscode-links-cli", "build", "module", "cli.js")
-    const cliProcess = crossSpawn("node", [cliPath, ...args], {
-      stdio: ["pipe", "pipe", "pipe"],
-      cwd: workspacePath,
-      env: { ...process.env },
-    })
-
-    let output = ""
-    let errorOutput = ""
-
-    cliProcess.stdout?.on("data", (data) => {
-      output += data.toString()
-    })
-
-    cliProcess.stderr?.on("data", (data) => {
-      errorOutput += data.toString()
-    })
-
-    cliProcess.on("Error", (error) => {
-      vscLog("Error", `CLI process error (node ${[cliPath, ...args].join(" ")}): ${error}`)
-    })
-
-    cliProcess.on("close", (code) => {
-      if (code === 0) {
-        resolve(output.trim())
-        vscLog("Info", `CLI process "node ${[cliPath, ...args].join(" ")}" succeeded`)
-      } else {
-        vscLog("Error", `CLI process "node ${[cliPath, ...args].join(" ")}" failed (code ${code})`)
-        vscLog("Error", `StdErr: ${errorOutput}`)
-        vscLog("Error", `StdOut: ${output}`)
-        resolve(null)
-      }
-    })
-
-    cliProcess.stdin?.write(content)
-    cliProcess.stdin?.end()
-  })
 }
