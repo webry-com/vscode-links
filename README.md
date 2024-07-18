@@ -2,15 +2,16 @@
 
 ## Setup
 
-- Install the extension [here](https://marketplace.visualstudio.com/items?itemName=web-dev-sam.vscode-links&ref=producthunt)
-- `npm i -D vscl@latest`
-- Create a config file `Ctrl+Shift+P` -> `VSCode Links: Create Config`
+- Install the extension [here](https://marketplace.visualstudio.com/items?itemName=web-dev-sam.vscode-links)
+- Create a config file `Ctrl+Shift+P` -> `VSC Links: Create Config File`
+- _Optional_ `npm i -D vscl@latest` (Adds typings for easier config editing)
 
 ## Debugging your config
 
 - Open the output panel
 - Select `VSCode Links` from the dropdown
 - Errors will be shown here
+- If the links dont work/update, try `Ctrl+Shift+P` -> `VSC Links: Restart` _(can happen when renaming/moving config file)_
 
 ## Config
 
@@ -21,8 +22,8 @@
 - **pattern:** Regex pattern to match links. Use `(?<link>ClickableText)` to define the clickable area if its different from the whole regex match. _(RegExp)_
 - **handle:** Function to handle the link. _(Function)_
   - **linkText:** Text matched by the pattern. _(string)_
-  - **file:** Function to get the file path based on the current file and os. **Usage:**
-  - **workspace:** Function to get the workspace file path based on your relative path and os. **Usage:**
+  - **file:** Template literal tag to get the file path based on the current file and os.
+  - **workspace:** Template literal tag to get the workspace file path based on your relative path and os.
 
 ## Examples
 
