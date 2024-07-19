@@ -32,9 +32,9 @@
 
 ## Examples
 
-### Git Issue Links
-
-You could create a config to open git issues in your browser like this:
+<details>
+  <summary>Git Links</summary>
+  You can create a config to open git issues in your browser like this:
 
 ```ts
 import { type Config } from "vscl"
@@ -55,9 +55,11 @@ export default {
 } satisfies Config
 ```
 
-### API Methods in Frappe
+</details>
 
-Here is a config to open the python file based on an api route in frappe:
+<details>
+  <summary>API Strings</summary>
+  Here is a config to open the python file based on an api route in frappe:
 
 ```ts
 import { type Config } from "vscl"
@@ -73,13 +75,15 @@ export default {
         return {
           target: workspace`${parts.join("/")}.py`,
           tooltip: `Open python file for the "${apiName}" API.`,
-          jumpPattern: `def ${apiName}(`, // Jump to the function definition
+          jumpPattern: `def ${apiName}(`, // Jump to the function definition in user.py
         }
       },
     },
   ],
 } satisfies Config
 ```
+
+</details>
 
 ## Latest Changes
 
