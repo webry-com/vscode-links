@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { LinkDefinitionProvider } from "../LinkDefinitionProvider"
+import { LinkDefinitionProvider } from "../linkDefinitionProvider"
 
 const linkProviders: Map<
   LinkDefinitionProvider,

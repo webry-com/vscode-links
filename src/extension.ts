@@ -6,29 +6,30 @@ import { registerOutputChannel } from "./utils/output"
 import { ConfigType, createBaseConfig } from "./utils/defaults"
 import { askWorkspace } from "./utils/vscode"
 import { createLinkProvider, disposeAllLinkProviders } from "./utils/linkProvider"
-import { createConfigWatchers, disposeConfigWatchers } from "./utils/watchers"
+import { updateConfigs, disposeConfigWatchers, watchConfigFiles } from "./utils/watchers"
 
-export async function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext) {
   registerOutputChannel(context)
+  updateConfigs()
+  watchConfigFiles(() => updateConfigs())
   createLinkProvider()
-  createConfigWatchers()
 
   registerRestartVSCodeLinksCommand(context)
   registerCreateConfigCommand(context)
 }
 
-export async function deactivate() {
-  await disposeConfigWatchers()
+export function deactivate() {
+  disposeConfigWatchers()
   disposeAllLinkProviders()
 }
 
 function registerRestartVSCodeLinksCommand(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("vscode-links.restartVSCodeLinks", async () => {
-      await disposeConfigWatchers()
       disposeAllLinkProviders()
+      updateConfigs()
+      watchConfigFiles(() => updateConfigs())
       createLinkProvider()
-      createConfigWatchers()
     }),
   )
 }

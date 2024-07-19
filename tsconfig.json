@@ -17,7 +17,13 @@
     "paths": {
       "ohash": [
         "./ohash-fix.d.ts"
-      ],
+      ]
     }
-  }
+  },
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "exclude": [
+    "./vsc-links.config.ts"
+  ]
 }
