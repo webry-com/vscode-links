@@ -13,7 +13,8 @@ export function showOutputChannel() {
 
 export function vscLog(logLevel: "Error" | "Warn" | "Info", message: unknown) {
   const timestamp = new Date().toLocaleTimeString("de-DE")
-  const logMessage = `[${timestamp}] [${logLevel.padEnd(5, " ")}] ${message}`
+  const logLevelPadded = `[${logLevel}]`.padEnd(7, " ")
+  const logMessage = `[${timestamp}] ${logLevelPadded} ${message}`
 
   if (logLevel === "Error") {
     console.error(logMessage)
