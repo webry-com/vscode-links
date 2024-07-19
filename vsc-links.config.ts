@@ -1,8 +1,7 @@
 export default {
   links: [
     {
-      include: "*",
-      pattern: /vscode-link/g,
+      pattern: /vscode-links/g,
       handle: ({}) => {
         return {
           target: "https://github.com/webry-com/vscode-links#readme",

@@ -1,11 +1,11 @@
 {
   "name": "vscode-links",
   "displayName": "VSCode Links",
-  "description": "Create custom links based on patterns.",
+  "description": "Create any links to files and websites based on patterns.",
   "author": "Samuel Braun <sam@webry.com>",
   "publisher": "web-dev-sam",
   "license": "GPL-3.0-only",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "icon": "icon.png",
   "homepage": "https://github.com/webry-com/vscode-links#readme",
   "engines": {
