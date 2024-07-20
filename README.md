@@ -17,6 +17,7 @@
 - Select `VSCode Links` from the dropdown
 - Errors will be shown here
 - If the links dont work/update, try `Ctrl+Shift+P` -> `VSC Links: Restart` _(can happen when renaming/moving config file)_
+- Use the `log` function argument of your handler function to log strings to the output panel.
 
 ## Config
 
@@ -29,6 +30,7 @@
   - **linkText:** Text matched by the pattern. _(string)_
   - **file:** Template literal tag to get the file path based on the current file and os.
   - **workspace:** Template literal tag to get the workspace file path based on your relative path and os.
+  - **log:** Function to log strings to the VSCode Links output panel.
 
 ## Examples
 

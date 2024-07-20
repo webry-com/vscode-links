@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { type ConfigLayerMeta, type ResolvedConfig, type UserInputConfig, loadConfig } from "c12"
-import { showOutputChannel, vscLog } from "./output"
+import { showOutputChannel, vscLog } from "../utils/output"
 import { z } from "zod"
 
 export const linkButtonSchema = z

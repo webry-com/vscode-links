@@ -1,10 +1,17 @@
 import * as vscode from "vscode"
 import fs from "fs"
-import { vscLog } from "./utils/output"
-import { getConfig, handlerResponseSchema, linkButtonSchema } from "./utils/watchers"
+import { vscLog } from "../utils/output"
+import { getConfig, handlerResponseSchema, linkButtonSchema } from "../utils/watchers"
 import path from "path"
 import { minimatch } from "minimatch"
 import type { z } from "zod"
+
+const linkProviders: Map<
+  LinkDefinitionProvider,
+  {
+    disposable: vscode.Disposable
+  }
+> = new Map()
 
 type VSCLButton = z.infer<typeof linkButtonSchema>
 type VSCLDocumentLink = vscode.DocumentLink &
@@ -33,6 +40,16 @@ const FILE_PREFIX =
       win32: "file:///",
     } as Record<string, string>
   )[process.platform] || "file://"
+
+export function createLinkProvider() {
+  const lp = new LinkDefinitionProvider()
+  const lpDisposable = vscode.languages.registerDocumentLinkProvider({ pattern: `**/*` }, lp)
+
+  linkProviders.set(lp, {
+    disposable: lpDisposable,
+  })
+  return lp
+}
 
 export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
   constructor() {}
@@ -228,4 +245,18 @@ function getLineAndColumn(
     line: lineNumber - 1,
     column: lines[lines.length - 1].length + 1,
   }
+}
+
+export function disposeLinkProvider(lp: LinkDefinitionProvider) {
+  const res = linkProviders.get(lp)
+  if (!res) {
+    return
+  }
+  res.disposable.dispose()
+}
+
+export function disposeAllLinkProviders() {
+  linkProviders.forEach((res) => {
+    res.disposable.dispose()
+  })
 }

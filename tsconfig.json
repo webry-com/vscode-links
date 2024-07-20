@@ -1,4 +1,7 @@
 {
+  "include": [
+    "./src/**/*.ts"
+  ],
   "compilerOptions": {
     "module": "Node16",
     "target": "ES2022",
@@ -14,16 +17,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
     "paths": {
       "ohash": [
         "./ohash-fix.d.ts"
       ]
     }
-  },
-  "include": [
-    "./src/**/*.ts"
-  ],
-  "exclude": [
-    "./vsc-links.config.ts"
-  ]
+  }
 }
