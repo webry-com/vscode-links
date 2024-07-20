@@ -3,6 +3,21 @@ import { type ConfigLayerMeta, type ResolvedConfig, type UserInputConfig, loadCo
 import { showOutputChannel, vscLog } from "./output"
 import { z } from "zod"
 
+export const linkButtonSchema = z
+  .object({
+    title: z.string(),
+    action: z.function().args().returns(z.void()),
+  })
+  .or(
+    z.object({
+      title: z.string(),
+      target: z.string(),
+      jumpPattern: z
+        .any()
+        .refine((val) => val instanceof RegExp || typeof val === "string")
+        .optional(),
+    }),
+  )
 export const handlerResponseSchema = z.object({
   target: z.string(),
   tooltip: z.string().optional(),
@@ -10,6 +25,8 @@ export const handlerResponseSchema = z.object({
     .any()
     .refine((val) => val instanceof RegExp || typeof val === "string")
     .optional(),
+  description: z.string().optional(),
+  buttons: z.array(linkButtonSchema).optional(),
 })
 export const configSchema = z.object({
   links: z.array(
@@ -110,6 +127,10 @@ export async function updateConfig(workspaceFolder: vscode.WorkspaceFolder) {
         vscLog("Error", "Failed to load config!")
       },
     },
+    extend: false,
+    packageJson: false,
+    rcFile: false,
+    globalRc: false,
   })
   cacheConfig(config, workspaceFolder)
 }

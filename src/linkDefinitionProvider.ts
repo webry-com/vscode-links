@@ -1,15 +1,19 @@
 import * as vscode from "vscode"
 import fs from "fs"
 import { vscLog } from "./utils/output"
-import { getConfig, handlerResponseSchema } from "./utils/watchers"
+import { getConfig, handlerResponseSchema, linkButtonSchema } from "./utils/watchers"
 import path from "path"
 import { minimatch } from "minimatch"
+import type { z } from "zod"
 
+type VSCLButton = z.infer<typeof linkButtonSchema>
 type VSCLDocumentLink = vscode.DocumentLink &
   (
     | {
         range: vscode.Range
         tooltip?: string
+        description?: string
+        buttons?: VSCLButton[]
         _originalVsclTarget?: string
         _vsclTarget?: vscode.Uri
         _jumpPattern?: RegExp | string
@@ -18,6 +22,8 @@ type VSCLDocumentLink = vscode.DocumentLink &
         target: vscode.Uri
         range: vscode.Range
         tooltip?: string
+        description?: string
+        buttons?: VSCLButton[]
       }
   )
 
@@ -107,6 +113,8 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
             links.push({
               range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
               tooltip: result.tooltip || "",
+              description: result.description,
+              buttons: result.buttons,
               _originalVsclTarget: result.target,
               _vsclTarget: vscode.Uri.parse(result.target),
               _jumpPattern: result.jumpPattern,
@@ -116,6 +124,8 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
               target: vscode.Uri.parse(result.target),
               range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
               tooltip: result.tooltip || "",
+              description: result.description,
+              buttons: result.buttons,
             })
           }
         }
@@ -178,7 +188,6 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
       vscLog("Error", `Could not find jumpPattern in document: ${link._vsclTarget.path}`)
       link.target = link._vsclTarget
     }
-    console.log(link)
 
     return {
       range: link.range,

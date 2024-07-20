@@ -72,7 +72,8 @@
     "esbuild": "^0.21.5",
     "globals": "^15.6.0",
     "prettier": "^3.3.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vscl": "^2.0.0-beta.2"
   },
   "dependencies": {
     "c12": "^1.11.1",

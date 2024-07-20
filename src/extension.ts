@@ -7,12 +7,17 @@ import { ConfigType, createBaseConfig } from "./utils/defaults"
 import { askWorkspace } from "./utils/vscode"
 import { createLinkProvider, disposeAllLinkProviders } from "./utils/linkProvider"
 import { updateConfigs, disposeConfigWatchers, watchConfigFiles } from "./utils/watchers"
+import { LinkHoverProvider } from "./linkHoverProvider"
+import { LinkButtonHoverProvider } from "./linkButtonHoverProvider"
 
 export function activate(context: vscode.ExtensionContext) {
   registerOutputChannel(context)
   updateConfigs()
   watchConfigFiles(() => updateConfigs())
   createLinkProvider()
+
+  context.subscriptions.push(vscode.languages.registerHoverProvider({ pattern: `**/*` }, new LinkHoverProvider()))
+  context.subscriptions.push(vscode.languages.registerHoverProvider({ pattern: `**/*` }, new LinkButtonHoverProvider()))
 
   registerRestartVSCodeLinksCommand(context)
   registerCreateConfigCommand(context)
