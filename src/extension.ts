@@ -5,9 +5,13 @@ import path from "path"
 import { registerOutputChannel } from "./utils/output"
 import { ConfigType, createBaseConfig } from "./utils/defaults"
 import { askWorkspace } from "./utils/vscode"
-import { updateConfigs, disposeConfigWatchers, watchConfigFiles } from "./utils/watchers"
+import { updateConfigs, disposeConfigWatchers, watchConfigFiles, getConfig } from "./utils/watchers"
 import { createLinkHoverProvider, disposeAllLinkHoverProviders } from "./providers/linkHoverProvider"
-import { createLinkButtonHoverProvider, disposeAllLinkButtonHoverProviders } from "./providers/linkButtonHoverProvider"
+import {
+  createLinkButtonHoverProvider,
+  disposeAllLinkButtonHoverProviders,
+  getButtonActionHandler,
+} from "./providers/linkButtonHoverProvider"
 import { createLinkProvider, disposeAllLinkProviders } from "./providers/linkProvider"
 
 export function activate(context: vscode.ExtensionContext) {
@@ -21,6 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   registerRestartVSCodeLinksCommand(context)
   registerCreateConfigCommand(context)
+  registerLinkButtonCommand(context)
 }
 
 export function deactivate() {
@@ -40,7 +45,10 @@ function registerRestartVSCodeLinksCommand(context: vscode.ExtensionContext) {
 
       updateConfigs()
       watchConfigFiles(() => updateConfigs())
+
       createLinkProvider()
+      createLinkHoverProvider()
+      createLinkButtonHoverProvider()
     }),
   )
 }
@@ -73,6 +81,15 @@ function registerCreateConfigCommand(context: vscode.ExtensionContext) {
         const document = await vscode.workspace.openTextDocument(filePath)
         await vscode.window.showTextDocument(document)
       }
+    }),
+  )
+}
+
+function registerLinkButtonCommand(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("vscode-links.linkButton", (args: { actionToken: string }) => {
+      const action = getButtonActionHandler(args.actionToken)
+      action?.()
     }),
   )
 }

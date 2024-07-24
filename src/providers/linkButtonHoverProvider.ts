@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { LinkDefinitionProvider } from "../providers/linkProvider"
-import { vscLog } from "../utils/output"
+import { v4 } from "uuid"
 
 const linkProviders: Map<
   LinkButtonHoverProvider,
@@ -8,6 +8,10 @@ const linkProviders: Map<
     disposable: vscode.Disposable
   }
 > = new Map()
+const buttonHandlers = new Map<string, () => void>()
+export function getButtonActionHandler(token: string) {
+  return buttonHandlers.get(token)
+}
 
 export function createLinkButtonHoverProvider() {
   const lbhp = new LinkButtonHoverProvider()
@@ -24,29 +28,37 @@ export class LinkButtonHoverProvider implements vscode.HoverProvider {
     const linkProvider = new LinkDefinitionProvider()
     const links = linkProvider.provideDocumentLinks(document)
     const link = links?.find((link) => link.buttons && link.range.contains(position))
-    if (!link) {
+    if (link == null) {
       return null
     }
 
     const markdown = new vscode.MarkdownString()
     markdown.supportHtml = true
 
+    const markdowns: string[] = []
     link.buttons?.forEach((button) => {
       const title = button.title.replace(/([[\]()\\])/g, "\\$1")
 
       if ("target" in button) {
-        markdown.appendMarkdown(`[${title}](${button.target})  `)
+        markdowns.push(`[${title}](${button.target})`)
       } else {
-        // button.action()
-        // markdown.isTrusted = true
-        // markdown.appendMarkdown(`[${title}](command:${button.action})  `)
-        // const commandUri = vscode.Uri.parse(
-        //   `command:vscode-links.customButton?${encodeURIComponent(JSON.stringify({ index }))}`,
-        // )
-        vscLog("Error", "Button action()s not yet supported! Use targets instead.")
+        markdown.isTrusted = true
+
+        const token = v4()
+        buttonHandlers.set(token, button.action)
+
+        const commandUri = vscode.Uri.parse(
+          `command:vscode-links.linkButton?${encodeURIComponent(
+            JSON.stringify({
+              actionToken: token,
+            }),
+          )}`,
+        )
+        markdowns.push(`[${title}](${commandUri})`)
       }
     })
 
+    markdown.appendMarkdown(markdowns.join("  •  "))
     return new vscode.Hover(markdown, link.range)
   }
 }

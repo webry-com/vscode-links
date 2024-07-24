@@ -5,7 +5,7 @@
   "author": "Samuel Braun <sam@webry.com>",
   "publisher": "web-dev-sam",
   "license": "GPL-3.0-only",
-  "version": "2.0.6",
+  "version": "2.1.1",
   "icon": "icon.png",
   "homepage": "https://github.com/webry-com/vscode-links#readme",
   "engines": {
@@ -61,11 +61,13 @@
     "vscode:prepublish": "npm run compile",
     "pretest": "npm run compile",
     "compile": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --minify",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "prerel": "vsce publish --pre-release"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
+    "@types/uuid": "^10.0.0",
     "@types/vscode": "^1.90.0",
     "@vscode/test-cli": "^0.0.8",
     "@vscode/test-electron": "^2.3.9",
@@ -78,6 +80,7 @@
   "dependencies": {
     "c12": "^1.11.1",
     "minimatch": "^10.0.1",
+    "uuid": "^10.0.0",
     "zod": "^3.23.8"
   }
 }

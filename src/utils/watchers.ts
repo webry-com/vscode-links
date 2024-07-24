@@ -84,8 +84,8 @@ export function disposeConfigWatchers() {
   }
 }
 
-export function getConfig(workspace: vscode.WorkspaceFolder) {
-  return configs.get(workspace.uri.fsPath)
+export function getConfig(workspace: vscode.WorkspaceFolder | string) {
+  return configs.get(typeof workspace === "string" ? workspace : workspace.uri.fsPath)
 }
 
 function cacheConfig(
