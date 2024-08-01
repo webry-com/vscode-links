@@ -5,7 +5,7 @@
   "author": "Samuel Braun <sam@webry.com>",
   "publisher": "web-dev-sam",
   "license": "GPL-3.0-only",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "icon": "icon.png",
   "homepage": "https://github.com/webry-com/vscode-links#readme",
   "engines": {
@@ -75,7 +75,7 @@
     "globals": "^15.6.0",
     "prettier": "^3.3.2",
     "typescript": "^5.3.3",
-    "vscl": "^2.0.0-beta.2"
+    "vscl": "^2.2.0"
   },
   "dependencies": {
     "c12": "^1.11.1",
