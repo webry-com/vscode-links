@@ -1,6 +1,7 @@
 # VSCode Links
 
 - [Setup](#setup)
+- [Docs](https://vscl.webry.com/getting-started.html)
 - [Config](#config)
 - [Examples](#examples)
 - [Latest Changes](#latest-changes)
@@ -10,6 +11,9 @@
 - Install the extension [here](https://marketplace.visualstudio.com/items?itemName=web-dev-sam.vscode-links)
 - Create a config file `Ctrl+Shift+P` -> `VSC Links: Create Config File`
 - _Optional_ `npm i -D vscl@latest` (Adds typings for easier config editing)
+
+## Docs
+Read the full docs [here](https://vscl.webry.com/getting-started.html)
 
 ## Debugging your config
 
@@ -90,6 +94,7 @@ export default {
 ## Latest Changes
 
 - _**Breaking:** The `workspace` and `file` helpers from `vscode-links-cli` will no longer work. Instead they are now arguments to the handle function (see examples)._
+- Added [docs](https://vscl.webry.com/getting-started.html)
 - Added Typescript support for the config file
 - Added "Restart" command to restart the extension
 - Added different formats for the "Create Config" command (.ts, .js. .cjs, .mjs)
