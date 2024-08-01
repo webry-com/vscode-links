@@ -15,6 +15,11 @@
 ## Docs
 Read the full docs [here](https://vscl.webry.com/getting-started.html)
 
+## Previews
+![](./previews/eslint-comment.png)
+![](./previews/eslint-config.png)
+![](./previews/out-git.png)
+
 ## Debugging your config
 
 - Open the output panel
