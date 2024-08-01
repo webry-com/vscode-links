@@ -1,15 +1,27 @@
 import * as vscode from "vscode"
 import fs from "fs"
-import { vscLog } from "./utils/output"
-import { getConfig, handlerResponseSchema } from "./utils/watchers"
+import { vscLog } from "../utils/output"
+import { getConfig } from "../utils/watchers"
 import path from "path"
 import { minimatch } from "minimatch"
+import type { z } from "zod"
+import { handlerResponseSchema, linkButtonSchema } from "src/utils/schemas"
 
+const linkProviders: Map<
+  LinkDefinitionProvider,
+  {
+    disposable: vscode.Disposable
+  }
+> = new Map()
+
+type VSCLButton = z.infer<typeof linkButtonSchema>
 type VSCLDocumentLink = vscode.DocumentLink &
   (
     | {
         range: vscode.Range
         tooltip?: string
+        description?: string
+        buttons?: VSCLButton[]
         _originalVsclTarget?: string
         _vsclTarget?: vscode.Uri
         _jumpPattern?: RegExp | string
@@ -18,6 +30,8 @@ type VSCLDocumentLink = vscode.DocumentLink &
         target: vscode.Uri
         range: vscode.Range
         tooltip?: string
+        description?: string
+        buttons?: VSCLButton[]
       }
   )
 
@@ -27,6 +41,16 @@ const FILE_PREFIX =
       win32: "file:///",
     } as Record<string, string>
   )[process.platform] || "file://"
+
+export function createLinkProvider() {
+  const lp = new LinkDefinitionProvider()
+  const lpDisposable = vscode.languages.registerDocumentLinkProvider({ pattern: `**/*` }, lp)
+
+  linkProviders.set(lp, {
+    disposable: lpDisposable,
+  })
+  return lp
+}
 
 export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
   constructor() {}
@@ -94,6 +118,11 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
             },
           })
 
+          if ("then" in result) {
+            vscLog("Error", "The link handler can not be async")
+            continue
+          }
+
           const handlerResultValidationResult = handlerResponseSchema.safeParse(result)
           if (!handlerResultValidationResult.success) {
             vscLog(
@@ -107,6 +136,8 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
             links.push({
               range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
               tooltip: result.tooltip || "",
+              description: result.description,
+              buttons: result.buttons,
               _originalVsclTarget: result.target,
               _vsclTarget: vscode.Uri.parse(result.target),
               _jumpPattern: result.jumpPattern,
@@ -116,6 +147,8 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
               target: vscode.Uri.parse(result.target),
               range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
               tooltip: result.tooltip || "",
+              description: result.description,
+              buttons: result.buttons,
             })
           }
         }
@@ -178,7 +211,6 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
       vscLog("Error", `Could not find jumpPattern in document: ${link._vsclTarget.path}`)
       link.target = link._vsclTarget
     }
-    console.log(link)
 
     return {
       range: link.range,
@@ -219,4 +251,18 @@ function getLineAndColumn(
     line: lineNumber - 1,
     column: lines[lines.length - 1].length + 1,
   }
+}
+
+export function disposeLinkProvider(lp: LinkDefinitionProvider) {
+  const res = linkProviders.get(lp)
+  if (!res) {
+    return
+  }
+  res.disposable.dispose()
+}
+
+export function disposeAllLinkProviders() {
+  linkProviders.forEach((res) => {
+    res.disposable.dispose()
+  })
 }

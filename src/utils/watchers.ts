@@ -1,47 +1,8 @@
 import * as vscode from "vscode"
 import { type ConfigLayerMeta, type ResolvedConfig, type UserInputConfig, loadConfig } from "c12"
-import { showOutputChannel, vscLog } from "./output"
+import { showOutputChannel, vscLog } from "../utils/output"
 import { z } from "zod"
-
-export const handlerResponseSchema = z.object({
-  target: z.string(),
-  tooltip: z.string().optional(),
-  jumpPattern: z
-    .any()
-    .refine((val) => val instanceof RegExp || typeof val === "string")
-    .optional(),
-})
-export const configSchema = z.object({
-  links: z.array(
-    z.object({
-      include: z
-        .union([z.string(), z.array(z.string())])
-        .optional()
-        .default("**/*"),
-      exclude: z
-        .union([z.string(), z.array(z.string())])
-        .optional()
-        .default([]),
-      pattern: z
-        .any()
-        .refine(
-          (val): val is RegExp | RegExp[] =>
-            val instanceof RegExp || (Array.isArray(val) && val.length > 0 && val.every((v) => v instanceof RegExp)),
-        ),
-      handle: z
-        .function()
-        .args(
-          z.object({
-            linkText: z.string(),
-            workspace: z.any(),
-            file: z.any(),
-            log: z.any(),
-          }),
-        )
-        .returns(handlerResponseSchema),
-    }),
-  ),
-})
+import { configSchema } from "./schemas"
 
 const watchers: vscode.FileSystemWatcher[] = []
 const configs: Map<string, z.infer<typeof configSchema>> = new Map()
@@ -67,8 +28,8 @@ export function disposeConfigWatchers() {
   }
 }
 
-export function getConfig(workspace: vscode.WorkspaceFolder) {
-  return configs.get(workspace.uri.fsPath)
+export function getConfig(workspace: vscode.WorkspaceFolder | string) {
+  return configs.get(typeof workspace === "string" ? workspace : workspace.uri.fsPath)
 }
 
 function cacheConfig(
@@ -110,6 +71,10 @@ export async function updateConfig(workspaceFolder: vscode.WorkspaceFolder) {
         vscLog("Error", "Failed to load config!")
       },
     },
+    extend: false,
+    packageJson: false,
+    rcFile: false,
+    globalRc: false,
   })
   cacheConfig(config, workspaceFolder)
 }

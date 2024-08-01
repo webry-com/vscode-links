@@ -1,6 +1,7 @@
 # VSCode Links
 
 - [Setup](#setup)
+- [Docs](https://vscl.webry.com/getting-started.html)
 - [Config](#config)
 - [Examples](#examples)
 - [Latest Changes](#latest-changes)
@@ -11,12 +12,16 @@
 - Create a config file `Ctrl+Shift+P` -> `VSC Links: Create Config File`
 - _Optional_ `npm i -D vscl@latest` (Adds typings for easier config editing)
 
+## Docs
+Read the full docs [here](https://vscl.webry.com/getting-started.html)
+
 ## Debugging your config
 
 - Open the output panel
 - Select `VSCode Links` from the dropdown
 - Errors will be shown here
 - If the links dont work/update, try `Ctrl+Shift+P` -> `VSC Links: Restart` _(can happen when renaming/moving config file)_
+- Use the `log` function argument of your handler function to log strings to the output panel.
 
 ## Config
 
@@ -29,6 +34,7 @@
   - **linkText:** Text matched by the pattern. _(string)_
   - **file:** Template literal tag to get the file path based on the current file and os.
   - **workspace:** Template literal tag to get the workspace file path based on your relative path and os.
+  - **log:** Function to log strings to the VSCode Links output panel.
 
 ## Examples
 
@@ -88,6 +94,7 @@ export default {
 ## Latest Changes
 
 - _**Breaking:** The `workspace` and `file` helpers from `vscode-links-cli` will no longer work. Instead they are now arguments to the handle function (see examples)._
+- Added [docs](https://vscl.webry.com/getting-started.html)
 - Added Typescript support for the config file
 - Added "Restart" command to restart the extension
 - Added different formats for the "Create Config" command (.ts, .js. .cjs, .mjs)

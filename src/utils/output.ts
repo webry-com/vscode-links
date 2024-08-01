@@ -17,11 +17,11 @@ export function vscLog(logLevel: "Error" | "Warn" | "Info", message: unknown) {
   const logMessage = `[${timestamp}] ${logLevelPadded} ${message}`
 
   if (logLevel === "Error") {
-    console.error(logMessage)
+    console.error("VSCL: ", logMessage)
   } else if (logLevel === "Warn") {
-    console.warn(logMessage)
+    console.warn("VSCL: ", logMessage)
   } else {
-    console.log(logMessage)
+    console.log("VSCL: ", logMessage)
   }
 
   outputChannel.appendLine(logMessage)
