@@ -1,0 +1,13 @@
+{
+    "folders": [
+        {
+            "path": "../vscl"
+        },
+        {
+            "path": "."
+        },
+        {
+            "path": "../vscl-docs"
+        }
+    ]
+}
