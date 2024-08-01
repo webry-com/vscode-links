@@ -5,7 +5,7 @@ import { getConfig } from "../utils/watchers"
 import path from "path"
 import { minimatch } from "minimatch"
 import type { z } from "zod"
-import { handlerResponseSchema, linkButtonSchema } from "src/utils/schemas"
+import { handlerResponseSchema, linkButtonSchema } from "../utils/schemas"
 
 const linkProviders: Map<
   LinkDefinitionProvider,
