@@ -1,10 +1,11 @@
 import * as vscode from "vscode"
 import fs from "fs"
 import { vscLog } from "../utils/output"
-import { getConfig, handlerResponseSchema, linkButtonSchema } from "../utils/watchers"
+import { getConfig } from "../utils/watchers"
 import path from "path"
 import { minimatch } from "minimatch"
 import type { z } from "zod"
+import { handlerResponseSchema, linkButtonSchema } from "src/utils/schemas"
 
 const linkProviders: Map<
   LinkDefinitionProvider,
@@ -116,6 +117,11 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
               vscLog("Info", logs.map((log) => log.toString()).join("  "))
             },
           })
+
+          if ("then" in result) {
+            vscLog("Error", "The link handler can not be async")
+            continue
+          }
 
           const handlerResultValidationResult = handlerResponseSchema.safeParse(result)
           if (!handlerResultValidationResult.success) {
