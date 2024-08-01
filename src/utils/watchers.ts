@@ -26,6 +26,7 @@ export function disposeConfigWatchers() {
   for (const watcher of watchers) {
     watcher.dispose()
   }
+  watchers.length = 0
 }
 
 export function getConfig(workspace: vscode.WorkspaceFolder | string) {
@@ -71,7 +72,6 @@ export async function updateConfig(workspaceFolder: vscode.WorkspaceFolder) {
         vscLog("Error", "Failed to load config!")
       },
     },
-    extend: false,
     packageJson: false,
     rcFile: false,
     globalRc: false,
