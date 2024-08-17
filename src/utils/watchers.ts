@@ -1,7 +1,9 @@
 import * as vscode from "vscode"
 import { type ConfigLayerMeta, type ResolvedConfig, type UserInputConfig, loadConfig } from "c12"
-import { showOutputChannel, vscLog } from "../utils/output"
+import { vscLog } from "../utils/output"
 import { z } from "zod"
+import fs from "fs"
+import path from "path"
 import { configSchema } from "./schemas"
 
 const watchers: vscode.FileSystemWatcher[] = []
@@ -40,15 +42,21 @@ function cacheConfig(
   if (config.config.__JITI_ERROR__) {
     configs.delete(workspaceFolder.uri.fsPath)
     vscLog("Error", JSON.stringify(config.config.__JITI_ERROR__, null, 2))
-    showOutputChannel()
     return
   }
 
   const validationResult = configSchema.safeParse(config.config)
   if (!validationResult.success) {
     configs.delete(workspaceFolder.uri.fsPath)
-    vscLog("Error", "Invalid config:\n" + JSON.stringify(validationResult.error, null, 2))
-    showOutputChannel()
+
+    const extensions = ["js", "ts", "mjs", "cjs", "mts", "cts"]
+    const configFileExists = extensions.some((ext) =>
+      fs.existsSync(path.normalize(workspaceFolder.uri.fsPath + "/vsc-links.config." + ext)),
+    )
+    if (configFileExists) {
+      vscLog("Error", `Invalid config in workspace "${workspaceFolder.name}":\n` + JSON.stringify(validationResult.error, null, 2))
+      return
+    }
     return
   }
 
