@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import { type ConfigLayerMeta, type ResolvedConfig, type UserInputConfig, loadConfig } from "c12"
 import { vscLog } from "../utils/output"
-import { z } from "zod"
+import type { z } from "zod"
 import fs from "fs"
 import path from "path"
 import { configSchema } from "./schemas"
@@ -47,21 +47,28 @@ function cacheConfig(
 
   const validationResult = configSchema.safeParse(config.config)
   if (!validationResult.success) {
-    configs.delete(workspaceFolder.uri.fsPath)
-
     const extensions = ["js", "ts", "mjs", "cjs", "mts", "cts"]
     const configFileExists = extensions.some((ext) =>
       fs.existsSync(path.normalize(workspaceFolder.uri.fsPath + "/vsc-links.config." + ext)),
     )
     if (configFileExists) {
-      vscLog("Error", `Invalid config in workspace "${workspaceFolder.name}":\n` + JSON.stringify(validationResult.error, null, 2))
+      vscLog("Info", "AAAA DELETE ")
+      configs.delete(workspaceFolder.uri.fsPath)
+      vscLog(
+        "Error",
+        `Invalid config in workspace "${workspaceFolder.name}":\n` + JSON.stringify(validationResult.error, null, 2),
+      )
       return
     }
     return
   }
 
+  vscLog("Info", "AAAA SET " + validationResult.data.links.length)
   configs.set(workspaceFolder.uri.fsPath, validationResult.data)
-  vscLog("Info", `Config in workspace "${workspaceFolder.name}" loaded!`)
+  vscLog(
+    "Info",
+    `Config in workspace "${workspaceFolder.name}" loaded with ${validationResult.data.links.length} link definitions!`,
+  )
 }
 
 export async function updateConfigs() {
@@ -84,5 +91,6 @@ export async function updateConfig(workspaceFolder: vscode.WorkspaceFolder) {
     rcFile: false,
     globalRc: false,
   })
+  vscLog("Info", "AAAA updateConfig " + config.config.links.length)
   cacheConfig(config, workspaceFolder)
 }

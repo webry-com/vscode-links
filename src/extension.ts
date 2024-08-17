@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 import fs from "fs"
 import path from "path"
 
-import { registerOutputChannel } from "./utils/output"
+import { registerOutputChannel, vscLog } from "./utils/output"
 import { ConfigType, createBaseConfig } from "./utils/defaults"
 import { askWorkspace } from "./utils/vscode"
 import { updateConfigs, disposeConfigWatchers, watchConfigFiles, getConfig } from "./utils/watchers"
@@ -17,13 +17,17 @@ import { createLinkProvider, disposeAllLinkProviders } from "./providers/linkPro
 export function activate(context: vscode.ExtensionContext) {
   registerOutputChannel(context)
   updateConfigs()
-  watchConfigFiles(() => updateConfigs())
+  watchConfigFiles(() => {
+    updateConfigs()
+    vscLog("Info", "Config Change Detected!")
+  })
 
   createLinkProvider()
   createLinkHoverProvider()
   createLinkButtonHoverProvider()
 
   registerRestartVSCodeLinksCommand(context)
+  registerRefreshProvidersVSCodeLinksCommand(context)
   registerCreateConfigCommand(context)
   registerLinkButtonCommand(context)
 }
@@ -44,7 +48,26 @@ function registerRestartVSCodeLinksCommand(context: vscode.ExtensionContext) {
       disposeAllLinkButtonHoverProviders()
 
       updateConfigs()
-      watchConfigFiles(() => updateConfigs())
+      watchConfigFiles(() => {
+        updateConfigs()
+        vscLog("Info", "Config Change Detected!")
+      })
+
+      createLinkProvider()
+      createLinkHoverProvider()
+      createLinkButtonHoverProvider()
+    }),
+  )
+}
+
+function registerRefreshProvidersVSCodeLinksCommand(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("vscode-links.refreshVSCodeLinksProviders", async () => {
+      disposeAllLinkProviders()
+      disposeAllLinkHoverProviders()
+      disposeAllLinkButtonHoverProviders()
+
+      updateConfigs()
 
       createLinkProvider()
       createLinkHoverProvider()

@@ -68,7 +68,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
     }
 
     const currentFileRelative = path.relative(workspace.uri.fsPath, document.uri.fsPath)
-    config.links = config.links.filter((link) => {
+    const configLinks = config.links.filter((link) => {
       const includes = Array.isArray(link.include) ? link.include : [link.include]
       const excludes = Array.isArray(link.exclude) ? link.exclude : [link.exclude]
       const isIncluded = includes.some((pattern) => minimatch(currentFileRelative, pattern, { dot: true }))
@@ -77,12 +77,16 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
     })
 
     const content = document.getText()
+    vscLog("Info", `provideDocumentLinks for ${document.fileName} (${document.lineCount} lines).`)
     const links: VSCLDocumentLink[] = []
-    for (const link of config.links) {
+    for (const link of configLinks) {
       link.pattern = Array.isArray(link.pattern) ? link.pattern : [link.pattern]
-      for (const regEx of link.pattern) {
+      //vscLog("Warn", link.pattern.length + " B LINKS (PATTERN)")
+      for (const pattern of link.pattern) {
+        const regEx = new RegExp(pattern, pattern.flags)
         let match: RegExpExecArray | null
         while ((match = regEx.exec(content))) {
+          //vscLog("Warn", config.links.length + " D LINKS (MATCH)")
           const range = {
             start: match.index,
             end: match.index + match[0].length,
@@ -155,6 +159,10 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
       }
     }
 
+    vscLog(
+      "Info",
+      `Result of provideDocumentLinks for ${document.fileName} (${document.lineCount} lines): ${links.length} Links!`,
+    )
     return links
   }
 

@@ -5,7 +5,7 @@
   "author": "Samuel Braun <sam@webry.com>",
   "publisher": "web-dev-sam",
   "license": "GPL-3.0-only",
-  "version": "2.2.2",
+  "version": "2.2.16",
   "icon": "icon.png",
   "homepage": "https://github.com/webry-com/vscode-links#readme",
   "engines": {
@@ -40,6 +40,10 @@
       {
         "command": "vscode-links.restartVSCodeLinks",
         "title": "VSC Links: Restart"
+      },
+      {
+        "command": "vscode-links.refreshVSCodeLinksProviders",
+        "title": "VSC Links: Refresh Config"
       }
     ]
   },
