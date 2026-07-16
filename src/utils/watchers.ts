@@ -39,14 +39,6 @@ export function getConfig(workspace: vscode.WorkspaceFolder | string): Config | 
 }
 
 function cacheConfig(config: ResolvedConfig, workspaceFolder: vscode.WorkspaceFolder) {
-  // oxlint-disable-next-line no-underscore-dangle
-  if (config.config.__JITI_ERROR__) {
-    configs.delete(workspaceFolder.uri.fsPath)
-    // oxlint-disable-next-line no-underscore-dangle
-    vscLog('Error', JSON.stringify(config.config.__JITI_ERROR__, null, 2))
-    return
-  }
-
   const validationResult = configSchema.safeParse(config.config)
   if (!validationResult.success) {
     const extensions = ['js', 'ts', 'mjs', 'cjs', 'mts', 'cts']
@@ -54,7 +46,6 @@ function cacheConfig(config: ResolvedConfig, workspaceFolder: vscode.WorkspaceFo
       fs.existsSync(path.normalize(workspaceFolder.uri.fsPath + '/vsc-links.config.' + ext)),
     )
     if (configFileExists) {
-      vscLog('Info', 'AAAA DELETE ')
       configs.delete(workspaceFolder.uri.fsPath)
       vscLog(
         'Error',
@@ -65,7 +56,6 @@ function cacheConfig(config: ResolvedConfig, workspaceFolder: vscode.WorkspaceFo
     return
   }
 
-  vscLog('Info', 'AAAA SET ' + validationResult.data.links.length)
   configs.set(workspaceFolder.uri.fsPath, validationResult.data)
   vscLog(
     'Info',
@@ -79,18 +69,19 @@ export async function updateConfigs(): Promise<void> {
 }
 
 export async function updateConfig(workspaceFolder: vscode.WorkspaceFolder): Promise<void> {
-  const config = await loadConfig({
-    cwd: workspaceFolder.uri.fsPath,
-    name: 'vsc-links',
-    jitiOptions: {
-      onError() {
-        vscLog('Error', 'Failed to load config!')
-      },
-    },
-    packageJson: false,
-    rcFile: false,
-    globalRc: false,
-  })
-  vscLog('Info', 'AAAA updateConfig ' + config.config.links.length)
+  let config: ResolvedConfig
+  try {
+    config = await loadConfig({
+      cwd: workspaceFolder.uri.fsPath,
+      name: 'vsc-links',
+      packageJson: false,
+      rcFile: false,
+      globalRc: false,
+    })
+  } catch (error) {
+    configs.delete(workspaceFolder.uri.fsPath)
+    vscLog('Error', `Failed to load config in workspace "${workspaceFolder.name}":\n` + String(error))
+    return
+  }
   cacheConfig(config, workspaceFolder)
 }

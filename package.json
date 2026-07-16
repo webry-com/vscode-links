@@ -29,9 +29,9 @@
     "check": "tsc -p ./",
     "lint": "oxlint .",
     "fmt": "oxfmt .",
-    "dev": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "dev": "node build.mjs",
     "vscode:prepublish": "npm run compile",
-    "compile": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --minify",
+    "compile": "node build.mjs --minify",
     "test": "vscode-test",
     "pretest": "npm run compile",
     "prepack": "vsce package --pre-release",
@@ -39,7 +39,7 @@
     "rel": "vsce publish"
   },
   "dependencies": {
-    "c12": "^1.11.1",
+    "c12": "^3.3.4",
     "minimatch": "^10.2.5",
     "uuid": "^14.0.1",
     "zod": "^4.4.3"
