@@ -1,5 +1,7 @@
 # VSCode Links
 
+![License: MIT License](https://img.shields.io/badge/License-mit-blue.svg)
+
 - [Setup](#setup)
 - [Docs](https://vscl.webry.com/getting-started.html)
 - [Config](#config)
