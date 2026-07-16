@@ -1,5 +1,8 @@
 # VSCode Links
 
+[![Tests](https://github.com/webry-com/vsc-links/actions/workflows/test.yml/badge.svg)](https://github.com/webry-com/vsc-links/actions/workflows/test.yml)
+![License: MIT License](https://img.shields.io/badge/License-MIT-blue.svg)
+
 - [Setup](#setup)
 - [Docs](https://vscl.webry.com/getting-started.html)
 - [Config](#config)
@@ -56,15 +59,15 @@ A string or array of strings to extend other config files. _(string | string[])_
   You can create a config to open git issues in your browser like this:
 
 ```ts
-import { type Config } from "vscl"
+import { type Config } from 'vscl'
 
 export default {
   links: [
     {
-      include: "**/*.js",
+      include: '**/*.js',
       pattern: /git#\d+/g, // Clickable: "git#123"
       handle: ({ linkText }) => {
-        const issue = linkText.replace("git#", "")
+        const issue = linkText.replace('git#', '')
         return {
           target: `https://github.com/webry-com/vsc-links/issues/${issue}`,
         }
@@ -81,18 +84,18 @@ export default {
   Here is a config to open the python file based on an api route in frappe:
 
 ```ts
-import { type Config } from "vscl"
+import { type Config } from 'vscl'
 
 export default {
   links: [
     {
-      include: "*",
+      include: '*',
       pattern: /"(?<link>frappe(\.[^"'`]+)+)"/g, // Clickable: "frappe.core.doctype.user.user.get_timezones"
       handle: ({ linkText, workspace }) => {
-        const parts = linkText.split(".")
+        const parts = linkText.split('.')
         const apiName = parts.pop()
         return {
-          target: workspace`${parts.join("/")}.py`,
+          target: workspace`${parts.join('/')}.py`,
           tooltip: `Open python file for the "${apiName}" API.`,
           jumpPattern: `def ${apiName}(`, // Jump to the function definition in user.py
         }

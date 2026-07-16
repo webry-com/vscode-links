@@ -1,10 +1,10 @@
-import * as vscode from "vscode"
+import * as vscode from 'vscode'
 
 export async function askWorkspace(): Promise<vscode.WorkspaceFolder | undefined> {
   const workspaceFolders = vscode.workspace.workspaceFolders ?? []
   if (workspaceFolders.length === 0) {
-    vscode.window.showErrorMessage("No workspaces are currently opened.")
-    return
+    vscode.window.showErrorMessage('No workspaces are currently opened.')
+    return undefined
   }
 
   let selectedWorkspaceName: string | undefined
@@ -14,20 +14,20 @@ export async function askWorkspace(): Promise<vscode.WorkspaceFolder | undefined
     selectedWorkspaceName = await vscode.window.showQuickPick(
       workspaceFolders.map((folder) => folder.name),
       {
-        placeHolder: "Select a workspace",
+        placeHolder: 'Select a workspace',
       },
     )
 
     if (!selectedWorkspaceName) {
-      vscode.window.showInformationMessage("No workspace was selected.")
-      return
+      vscode.window.showInformationMessage('No workspace was selected.')
+      return undefined
     }
   }
 
   const selectedWorkspace = workspaceFolders.find((folder) => folder.name === selectedWorkspaceName)
   if (!selectedWorkspace) {
-    vscode.window.showErrorMessage("Failed to find the selected workspace.")
-    return
+    vscode.window.showErrorMessage('Failed to find the selected workspace.')
+    return undefined
   }
 
   return selectedWorkspace

@@ -1,25 +1,27 @@
-import * as vscode from "vscode"
-import fs from "fs"
-import path from "path"
+import fs from 'fs'
+import path from 'path'
 
-import { registerOutputChannel, vscLog } from "./utils/output"
-import { ConfigType, createBaseConfig } from "./utils/defaults"
-import { askWorkspace } from "./utils/vscode"
-import { updateConfigs, disposeConfigWatchers, watchConfigFiles } from "./utils/watchers"
-import { createLinkHoverProvider, disposeAllLinkHoverProviders } from "./providers/linkHoverProvider"
+import * as vscode from 'vscode'
+
 import {
   createLinkButtonHoverProvider,
   disposeAllLinkButtonHoverProviders,
   getButtonActionHandler,
-} from "./providers/linkButtonHoverProvider"
-import { createLinkProvider, disposeAllLinkProviders } from "./providers/linkProvider"
+} from './providers/linkButtonHoverProvider'
+import { createLinkHoverProvider, disposeAllLinkHoverProviders } from './providers/linkHoverProvider'
+import { createLinkProvider, disposeAllLinkProviders } from './providers/linkProvider'
+import type { ConfigType } from './utils/defaults'
+import { createBaseConfig } from './utils/defaults'
+import { registerOutputChannel, vscLog } from './utils/output'
+import { askWorkspace } from './utils/vscode'
+import { updateConfigs, disposeConfigWatchers, watchConfigFiles } from './utils/watchers'
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
   registerOutputChannel(context)
-  updateConfigs()
+  void updateConfigs()
   watchConfigFiles(() => {
-    updateConfigs()
-    vscLog("Info", "Config Change Detected!")
+    void updateConfigs()
+    vscLog('Info', 'Config Change Detected!')
   })
 
   createLinkProvider()
@@ -32,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
   registerLinkButtonCommand(context)
 }
 
-export function deactivate() {
+export function deactivate(): void {
   disposeConfigWatchers()
 
   disposeAllLinkProviders()
@@ -42,15 +44,15 @@ export function deactivate() {
 
 function registerRestartVSCodeLinksCommand(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.commands.registerCommand("vsc-links.restartVSCodeLinks", async () => {
+    vscode.commands.registerCommand('vsc-links.restartVSCodeLinks', () => {
       disposeAllLinkProviders()
       disposeAllLinkHoverProviders()
       disposeAllLinkButtonHoverProviders()
 
-      updateConfigs()
+      void updateConfigs()
       watchConfigFiles(() => {
-        updateConfigs()
-        vscLog("Info", "Config Change Detected!")
+        void updateConfigs()
+        vscLog('Info', 'Config Change Detected!')
       })
 
       createLinkProvider()
@@ -62,12 +64,12 @@ function registerRestartVSCodeLinksCommand(context: vscode.ExtensionContext) {
 
 function registerRefreshProvidersVSCodeLinksCommand(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.commands.registerCommand("vsc-links.refreshVSCodeLinksProviders", async () => {
+    vscode.commands.registerCommand('vsc-links.refreshVSCodeLinksProviders', () => {
       disposeAllLinkProviders()
       disposeAllLinkHoverProviders()
       disposeAllLinkButtonHoverProviders()
 
-      updateConfigs()
+      void updateConfigs()
 
       createLinkProvider()
       createLinkHoverProvider()
@@ -78,15 +80,15 @@ function registerRefreshProvidersVSCodeLinksCommand(context: vscode.ExtensionCon
 
 function registerCreateConfigCommand(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.commands.registerCommand("vsc-links.createConfig", async () => {
+    vscode.commands.registerCommand('vsc-links.createConfig', async () => {
       const selectedWorkspace = await askWorkspace()
       if (!selectedWorkspace) {
         return
       }
 
-      const configTypes: ConfigType[] = [".ts", ".js", ".cjs", ".mjs"] as const
+      const configTypes: ConfigType[] = ['.ts', '.js', '.cjs', '.mjs'] as const
       const configType = await vscode.window.showQuickPick(configTypes, {
-        placeHolder: "Select a format...",
+        placeHolder: 'Select a format...',
       })
       const isConfigType = (t: any): t is ConfigType => configTypes.includes(t)
       if (!configType || !isConfigType(configType)) {
@@ -94,7 +96,7 @@ function registerCreateConfigCommand(context: vscode.ExtensionContext) {
       }
 
       const configContent = createBaseConfig(configType)
-      const filePath = path.join(selectedWorkspace.uri.fsPath, "vsc-links.config" + configType)
+      const filePath = path.join(selectedWorkspace.uri.fsPath, 'vsc-links.config' + configType)
 
       if (fs.existsSync(filePath)) {
         const document = await vscode.workspace.openTextDocument(filePath)
@@ -110,7 +112,7 @@ function registerCreateConfigCommand(context: vscode.ExtensionContext) {
 
 function registerLinkButtonCommand(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.commands.registerCommand("vsc-links.linkButton", (args: { actionToken: string }) => {
+    vscode.commands.registerCommand('vsc-links.linkButton', (args: { actionToken: string }) => {
       const action = getButtonActionHandler(args.actionToken)
       action?.()
     }),

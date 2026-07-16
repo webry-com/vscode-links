@@ -23,8 +23,8 @@ export default {
             {
               title: 'package.json Line 5 Col 10',
               target: args.workspace`package.json:5:10`,
-            }
-          ]
+            },
+          ],
         }
       },
     },
