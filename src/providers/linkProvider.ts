@@ -1,48 +1,51 @@
-import fs from "fs"
-import { minimatch } from "minimatch"
-import path from "path"
-import * as vscode from "vscode"
-import type { z } from "zod"
-import { vscLog } from "../utils/output"
-import { handlerResponseSchema, linkButtonSchema } from "../utils/schemas"
-import { getConfig } from "../utils/watchers"
+import fs from 'fs'
+import path from 'path'
 
-const linkProviders: Map<
+import { minimatch } from 'minimatch'
+import * as vscode from 'vscode'
+import type { z } from 'zod'
+
+import { vscLog } from '@/utils/output'
+import type { linkButtonSchema } from '@/utils/schemas'
+import { handlerResponseSchema } from '@/utils/schemas'
+import { getConfig } from '@/utils/watchers'
+
+const linkProviders = new Map<
   LinkDefinitionProvider,
   {
     disposable: vscode.Disposable
   }
-> = new Map()
+>()
 
 type VSCLButton = z.infer<typeof linkButtonSchema>
 type VSCLDocumentLink = vscode.DocumentLink &
   (
     | {
-      range: vscode.Range
-      tooltip?: string
-      description?: string
-      buttons?: VSCLButton[]
-      _originalVsclTarget?: string
-      _vsclTarget?: vscode.Uri
-      _jumpPattern?: RegExp | string
-    }
+        range: vscode.Range
+        tooltip?: string
+        description?: string
+        buttons?: VSCLButton[]
+        _originalVsclTarget?: string
+        _vsclTarget?: vscode.Uri
+        _jumpPattern?: RegExp | string
+      }
     | {
-      target: vscode.Uri
-      range: vscode.Range
-      tooltip?: string
-      description?: string
-      buttons?: VSCLButton[]
-    }
+        target: vscode.Uri
+        range: vscode.Range
+        tooltip?: string
+        description?: string
+        buttons?: VSCLButton[]
+      }
   )
 
 const FILE_PREFIX =
   (
     {
-      win32: "file:///",
+      win32: 'file:///',
     } as Record<string, string>
-  )[process.platform] || "file://"
+  )[process.platform] || 'file://'
 
-export function createLinkProvider() {
+export function createLinkProvider(): LinkDefinitionProvider {
   const lp = new LinkDefinitionProvider()
   const lpDisposable = vscode.languages.registerDocumentLinkProvider({ pattern: `**/*` }, lp)
 
@@ -53,8 +56,6 @@ export function createLinkProvider() {
 }
 
 export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
-  constructor() { }
-
   provideDocumentLinks(document: vscode.TextDocument): VSCLDocumentLink[] | null {
     const workspace = vscode.workspace.getWorkspaceFolder(document.uri)
     if (!workspace) {
@@ -63,7 +64,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
 
     const config = getConfig(workspace)
     if (config == null) {
-      vscLog("Error", `No valid config loaded in workspace "${workspace.name}"`)
+      vscLog('Error', `No valid config loaded in workspace "${workspace.name}"`)
       return null
     }
 
@@ -77,7 +78,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
     })
 
     const content = document.getText()
-    vscLog("Info", `provideDocumentLinks for ${document.fileName} (${document.lineCount} lines).`)
+    vscLog('Info', `provideDocumentLinks for ${document.fileName} (${document.lineCount} lines).`)
     const links: VSCLDocumentLink[] = []
     for (const link of configLinks) {
       link.pattern = Array.isArray(link.pattern) ? link.pattern : [link.pattern]
@@ -91,7 +92,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
             end: match.index + match[0].length,
           }
 
-          if (match.groups && "link" in match.groups) {
+          if (match.groups && 'link' in match.groups) {
             const linkText = match.groups.link
             range.start = match.index + match[0].indexOf(linkText)
             range.end = match.index + match[0].indexOf(linkText) + linkText.length
@@ -101,38 +102,38 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
           const result = link.handle({
             linkText,
             workspace(strings: TemplateStringsArray, ...values: string[]): string {
-              let builtString = ""
-              strings.forEach((string, i) => {
-                builtString += string + (values[i] || "")
-              })
-              const filePath = `${workspace.uri.fsPath}/${builtString}`.replace(/[\\/]+/g, "/")
+              let builtString = ''
+              for (const [i, string] of strings.entries()) {
+                builtString += string + (values[i] || '')
+              }
+              const filePath = `${workspace.uri.fsPath}/${builtString}`.replace(/[\\/]+/g, '/')
               return `${FILE_PREFIX}${filePath}`
             },
             file(strings: TemplateStringsArray, ...values: string[]): string {
-              let builtString = ""
-              strings.forEach((string, i) => {
-                builtString += string + (values[i] || "")
-              })
-              const filePath = builtString.replace(/[\\/]+/g, "/")
+              let builtString = ''
+              for (const [i, string] of strings.entries()) {
+                builtString += string + (values[i] || '')
+              }
+              const filePath = builtString.replace(/[\\/]+/g, '/')
               return `${FILE_PREFIX}${filePath}`
             },
             reload(): void {
-              vscode.commands.executeCommand("vsc-links.refreshVSCodeLinksProviders")
+              vscode.commands.executeCommand('vsc-links.refreshVSCodeLinksProviders')
             },
             log(...logs: any[]) {
-              vscLog("Info", logs.map((log) => log.toString()).join("  "))
+              vscLog('Info', logs.map((log) => String(log)).join('  '))
             },
           })
 
-          if ("then" in result) {
-            vscLog("Error", "The link handler can not be async")
+          if ('then' in result) {
+            vscLog('Error', 'The link handler can not be async')
             continue
           }
 
           const handlerResultValidationResult = handlerResponseSchema.safeParse(result)
           if (!handlerResultValidationResult.success) {
             vscLog(
-              "Warn",
+              'Warn',
               `Skipping link "${linkText}" in file "${document.fileName}" due to invalid handler response: ${handlerResultValidationResult.error}`,
             )
             continue
@@ -141,7 +142,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
           if (result.jumpPattern) {
             links.push({
               range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
-              tooltip: result.tooltip || "",
+              tooltip: result.tooltip ?? '',
               description: result.description,
               buttons: result.buttons,
               _originalVsclTarget: result.target,
@@ -150,11 +151,11 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
             })
           } else {
             // Check if the target has :line:column format
-            const lineColumnMatch = result.target.match(/:(\d+)(?::(\d+))?$/)
+            const lineColumnMatch = /:(\d+)(?::(\d+))?$/.exec(result.target)
             if (lineColumnMatch) {
               links.push({
                 range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
-                tooltip: result.tooltip || "",
+                tooltip: result.tooltip ?? '',
                 description: result.description,
                 buttons: result.buttons,
                 _originalVsclTarget: result.target,
@@ -165,7 +166,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
               links.push({
                 target: vscode.Uri.parse(result.target),
                 range: new vscode.Range(document.positionAt(range.start), document.positionAt(range.end)),
-                tooltip: result.tooltip || "",
+                tooltip: result.tooltip ?? '',
                 description: result.description,
                 buttons: result.buttons,
               })
@@ -176,23 +177,27 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
     }
 
     vscLog(
-      "Info",
+      'Info',
       `Result of provideDocumentLinks for ${document.fileName} (${document.lineCount} lines): ${links.length} Links!`,
     )
     return links
   }
 
   resolveDocumentLink(
-    link: vscode.DocumentLink & { _vsclTarget: vscode.Uri; _jumpPattern?: RegExp | string; _originalVsclTarget: string },
+    link: vscode.DocumentLink & {
+      _vsclTarget: vscode.Uri
+      _jumpPattern?: RegExp | string
+      _originalVsclTarget: string
+    },
   ): vscode.ProviderResult<vscode.DocumentLink> {
     if (link.target) {
       return link
     }
 
     // Parse :line:column format from the original target
-    const lineColumnMatch = link._originalVsclTarget.match(/:(\d+)(?::(\d+))?$/)
+    const lineColumnMatch = /:(\d+)(?::(\d+))?$/.exec(link._originalVsclTarget)
     if (lineColumnMatch) {
-      const line = parseInt(lineColumnMatch[1], 10)
+      const line = Number.parseInt(lineColumnMatch[1], 10)
       // Remove the :line:column part from the target to get the actual file path
       const cleanTarget = link._originalVsclTarget.replace(/:(\d+)(?::(\d+))?$/, '')
       link.target = vscode.Uri.parse(`${cleanTarget}#L${line}`)
@@ -203,7 +208,7 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
       }
     }
 
-    if (link._vsclTarget.scheme === "file") {
+    if (link._vsclTarget.scheme === 'file') {
       const targetDocument = vscode.workspace.textDocuments.find((doc) => doc.uri.path === link._vsclTarget.path)
       if (targetDocument) {
         if (link._jumpPattern instanceof RegExp) {
@@ -214,9 +219,9 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
               `${link._originalVsclTarget}#L${position.line + 1}:${position.character + 1}`,
             )
           }
-        } else if (link._jumpPattern && typeof link._jumpPattern === "string") {
+        } else if (link._jumpPattern && typeof link._jumpPattern === 'string') {
           const index = targetDocument.getText().indexOf(link._jumpPattern)
-          if (index >= 0) {
+          if (index !== -1) {
             const position = targetDocument.positionAt(index)
             link.target = vscode.Uri.parse(
               `${link._originalVsclTarget}#L${position.line + 1}:${position.character + 1}`,
@@ -225,28 +230,28 @@ export class LinkDefinitionProvider implements vscode.DocumentLinkProvider {
         }
       } else {
         try {
-          const targetDocumentContent = fs.readFileSync(link._vsclTarget.fsPath, "utf8")
+          const targetDocumentContent = fs.readFileSync(link._vsclTarget.fsPath, 'utf8')
           if (link._jumpPattern instanceof RegExp) {
             const index = targetDocumentContent.search(link._jumpPattern)
             if (index >= 0) {
               const { line, column } = getLineAndColumn(targetDocumentContent, index)
               link.target = vscode.Uri.parse(`${link._originalVsclTarget}#L${line}:${column}`)
             }
-          } else if (link._jumpPattern && typeof link._jumpPattern === "string") {
+          } else if (link._jumpPattern && typeof link._jumpPattern === 'string') {
             const index = targetDocumentContent.indexOf(link._jumpPattern)
-            if (index >= 0) {
+            if (index !== -1) {
               const { line, column } = getLineAndColumn(targetDocumentContent, index)
               link.target = vscode.Uri.parse(`${link._originalVsclTarget}#L${line}:${column}`)
             }
           }
         } catch (error) {
-          vscLog("Error", error)
+          vscLog('Error', error)
         }
       }
     }
 
     if (!link.target) {
-      vscLog("Error", `Could not find jumpPattern in document: ${link._vsclTarget.path}`)
+      vscLog('Error', `Could not find jumpPattern in document: ${link._vsclTarget.path}`)
       link.target = link._vsclTarget
     }
 
@@ -269,7 +274,7 @@ function getLineAndColumn(
     return { line: 1, column: 1 }
   }
 
-  const lines = text.split("\n")
+  const lines = text.split('\n')
   let currentLength = 0
   let lineNumber = 1
 
@@ -291,7 +296,7 @@ function getLineAndColumn(
   }
 }
 
-export function disposeLinkProvider(lp: LinkDefinitionProvider) {
+export function disposeLinkProvider(lp: LinkDefinitionProvider): void {
   const res = linkProviders.get(lp)
   if (!res) {
     return
@@ -299,8 +304,8 @@ export function disposeLinkProvider(lp: LinkDefinitionProvider) {
   res.disposable.dispose()
 }
 
-export function disposeAllLinkProviders() {
-  linkProviders.forEach((res) => {
+export function disposeAllLinkProviders(): void {
+  for (const res of linkProviders.values()) {
     res.disposable.dispose()
-  })
+  }
 }

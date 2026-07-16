@@ -1,4 +1,5 @@
-import { string, function as func, void as vod, promise, object, any, array, union } from "zod"
+import type z from 'zod'
+import { string, function as func, void as vod, promise, object, any, array, union } from 'zod'
 
 export const linkButtonSchema = object({
   title: string(),
@@ -15,7 +16,7 @@ export const handlerResponseSchema = object({
   target: string(),
   tooltip: string().optional(),
   jumpPattern: any()
-    .refine((val) => val instanceof RegExp || typeof val === "string")
+    .refine((val) => val instanceof RegExp || typeof val === 'string')
     .optional(),
   description: string().optional(),
   buttons: array(linkButtonSchema).optional(),
@@ -25,7 +26,7 @@ export const configSchema = object({
     object({
       include: union([string(), array(string())])
         .optional()
-        .default("**/*"),
+        .default('**/*'),
       exclude: union([string(), array(string())])
         .optional()
         .default([]),
@@ -47,3 +48,4 @@ export const configSchema = object({
     }),
   ),
 })
+export type Config = z.infer<typeof configSchema>

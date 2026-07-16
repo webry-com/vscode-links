@@ -1,14 +1,15 @@
-import * as vscode from "vscode"
-import { LinkDefinitionProvider } from "../providers/linkProvider"
+import * as vscode from 'vscode'
 
-const linkProviders: Map<
+import { LinkDefinitionProvider } from './linkProvider'
+
+const linkProviders = new Map<
   LinkHoverProvider,
   {
     disposable: vscode.Disposable
   }
-> = new Map()
+>()
 
-export function createLinkHoverProvider() {
+export function createLinkHoverProvider(): LinkHoverProvider {
   const lhp = new LinkHoverProvider()
   const lhpDisposable = vscode.languages.registerHoverProvider({ pattern: `**/*` }, lhp)
 
@@ -22,7 +23,7 @@ export class LinkHoverProvider implements vscode.HoverProvider {
   provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.ProviderResult<vscode.Hover> {
     const linkProvider = new LinkDefinitionProvider()
     const links = linkProvider.provideDocumentLinks(document)
-    const link = links?.find((link) => link.description && link.range.contains(position))
+    const link = links?.find((lnk) => lnk.description && lnk.range.contains(position))
     if (!link) {
       return null
     }
@@ -34,7 +35,7 @@ export class LinkHoverProvider implements vscode.HoverProvider {
   }
 }
 
-export function disposeLinkHoverProvider(lhp: LinkHoverProvider) {
+export function disposeLinkHoverProvider(lhp: LinkHoverProvider): void {
   const res = linkProviders.get(lhp)
   if (!res) {
     return
@@ -42,8 +43,8 @@ export function disposeLinkHoverProvider(lhp: LinkHoverProvider) {
   res.disposable.dispose()
 }
 
-export function disposeAllLinkHoverProviders() {
-  linkProviders.forEach((res) => {
+export function disposeAllLinkHoverProviders(): void {
+  for (const res of linkProviders.values()) {
     res.disposable.dispose()
-  })
+  }
 }

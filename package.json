@@ -1,36 +1,63 @@
 {
   "name": "vsc-links",
   "displayName": "VSC Links",
-  "description": "Create any links to files and websites based on patterns.",
-  "author": "Samuel Braun <sam@webry.com>",
-  "publisher": "webry",
-  "license": "GPL-3.0-only",
   "version": "2.4.1",
-  "icon": "icon.png",
-  "homepage": "https://github.com/webry-com/vsc-links#readme",
-  "engines": {
-    "vscode": "^1.90.0"
-  },
+  "description": "Create any links to files and websites based on patterns.",
   "categories": [
     "Other"
   ],
-  "bugs": {
-    "email": "sam@webry.com",
-    "url": "https://github.com/webry-com/vsc-links/issues"
-  },
   "keywords": [
     "links",
     "tool",
     "url"
   ],
+  "homepage": "https://github.com/webry-com/vsc-links#readme",
+  "bugs": {
+    "url": "https://github.com/webry-com/vsc-links/issues",
+    "email": "sam@webry.com"
+  },
+  "license": "GPL-3.0-only",
+  "author": "Samuel Braun <sam@webry.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/webry-com/vsc-links"
   },
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+  "publisher": "webry",
   "main": "./out/main.js",
+  "scripts": {
+    "watch": "tsc -watch -p ./",
+    "check": "tsc -p ./",
+    "lint": "oxlint .",
+    "fmt": "oxfmt .",
+    "dev": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "vscode:prepublish": "npm run compile",
+    "compile": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --minify",
+    "test": "vscode-test",
+    "pretest": "npm run compile",
+    "prepack": "vsce package --pre-release",
+    "prepubl": "vsce publish --pre-release",
+    "rel": "vsce publish"
+  },
+  "dependencies": {
+    "c12": "^1.11.1",
+    "minimatch": "^10.0.1",
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/uuid": "^10.0.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-cli": "^0.0.8",
+    "@vscode/test-electron": "^2.3.9",
+    "esbuild": "^0.25.8",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
+    "oxlint-tsgolint": "^0.24.0",
+    "typescript": "^7.0.2",
+    "vscl": "^2.3.0"
+  },
   "contributes": {
     "commands": [
       {
@@ -47,6 +74,16 @@
       }
     ]
   },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
   "capabilities": {
     "virtualWorkspaces": {
       "supported": false,
@@ -56,39 +93,5 @@
       "supported": false,
       "description": "VSCode Links requires workspace trust because it loads configuration files and code from the workspace and executes it."
     }
-  },
-  "extensionKind": [
-    "workspace"
-  ],
-  "scripts": {
-    "watch": "tsc -watch -p ./",
-    "check": "tsc -p ./",
-    "dev": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --sourcemap",
-    "vscode:prepublish": "npm run compile",
-    "compile": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --minify",
-    "test": "vscode-test",
-    "pretest": "npm run compile",
-    "prepack": "vsce package --pre-release",
-    "prepubl": "vsce publish --pre-release",
-    "rel": "vsce publish"
-  },
-  "devDependencies": {
-    "@types/mocha": "^10.0.6",
-    "@types/node": "18.x",
-    "@types/uuid": "^10.0.0",
-    "@types/vscode": "^1.90.0",
-    "@vscode/test-cli": "^0.0.8",
-    "@vscode/test-electron": "^2.3.9",
-    "esbuild": "^0.25.8",
-    "globals": "^15.6.0",
-    "prettier": "^3.3.2",
-    "typescript": "^7.0.2",
-    "vscl": "^2.3.0"
-  },
-  "dependencies": {
-    "c12": "^1.11.1",
-    "minimatch": "^10.0.1",
-    "uuid": "^10.0.0",
-    "zod": "^3.23.8"
   }
 }

@@ -1,21 +1,16 @@
 {
-  "include": [
-    "./src/**/*.ts"
-  ],
+  "include": ["./src/**/*.ts"],
   "compilerOptions": {
     "target": "esnext",
     "outDir": "out",
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "sourceMap": true,
     "rootDir": "src",
     "strict": true,
     "skipLibCheck": true,
     "paths": {
-      "ohash": [
-        "./ohash-fix.d.ts"
-      ]
+      "ohash": ["./ohashFix.d.ts"],
+      "@/*": ["./src/*"]
     }
   }
 }

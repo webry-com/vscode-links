@@ -1,0 +1,158 @@
+{
+  "plugins": ["import", "typescript", "unicorn"],
+  "options": {
+    "typeAware": true
+  },
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "rules": {
+    "typescript/use-unknown-in-catch-callback-variable": "error",
+    "typescript/strict-void-return": "error",
+    "typescript/return-await": "error",
+    "typescript/restrict-plus-operands": "error",
+    "typescript/require-await": "error",
+    "typescript/promise-function-async": "error",
+    "typescript/prefer-ts-expect-error": "error",
+    "typescript/prefer-regexp-exec": "error",
+    "typescript/prefer-reduce-type-parameter": "error",
+    "typescript/prefer-optional-chain": "error",
+    "typescript/prefer-nullish-coalescing": "error",
+    "typescript/prefer-includes": "error",
+    "typescript/prefer-function-type": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/prefer-find": "error",
+    "typescript/only-throw-error": "error",
+    "typescript/non-nullable-type-assertion-style": "error",
+    "typescript/no-var-requires": "error",
+    "typescript/no-unsafe-return": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-unnecessary-qualifier": "error",
+    "typescript/no-unnecessary-condition": "error",
+    "typescript/no-restricted-types": [
+      "error",
+      {
+        "types": {
+          "Object": {
+            "message": "Avoid using Object as it is too general."
+          },
+          "object": {
+            "message": "Avoid using object as it is too general."
+          },
+          "{}": {
+            "message": "Avoid using {} as it is too general. If you want to type an object that is always empty use EmptyObject instead."
+          }
+        }
+      }
+    ],
+    "typescript/no-require-imports": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/no-invalid-void-type": "error",
+    "typescript/no-import-type-side-effects": "error",
+    "typescript/no-empty-interface": "error",
+    "typescript/no-dynamic-delete": "error",
+    "typescript/explicit-module-boundary-types": "error",
+    "typescript/dot-notation": "error",
+    "typescript/consistent-type-imports": "error",
+    "typescript/consistent-type-exports": "error",
+    "typescript/consistent-type-assertions": "error",
+    "typescript/consistent-indexed-object-style": "error",
+    "typescript/consistent-generic-constructors": "error",
+    "typescript/ban-tslint-comment": "error",
+    "typescript/ban-ts-comment": [
+      "error",
+      {
+        "ts-ignore": false,
+        "ts-check": false,
+        "ts-expect-error": "allow-with-description",
+        "ts-nocheck": "allow-with-description",
+        "minimumDescriptionLength": 32
+      }
+    ],
+    "typescript/array-type": "error",
+    "typescript/adjacent-overload-signatures": "error",
+    "import/no-relative-parent-imports": "error",
+    "import/no-unassigned-import": [
+      "error",
+      {
+        "allow": ["**/*.css"]
+      }
+    ],
+    "import/no-mutable-exports": "error",
+    "import/no-dynamic-require": "error",
+    "import/no-duplicates": "error",
+    "import/no-default-export": "error",
+    "import/no-cycle": "error",
+    "import/no-commonjs": "error",
+    "import/named": "error",
+    "import/export": "error",
+    "import/newline-after-import": [
+      "error",
+      {
+        "count": 1
+      }
+    ],
+    "import/max-dependencies": [
+      "error",
+      {
+        "max": 10
+      }
+    ],
+    "import/first": ["error", "absolute-first"],
+    "oxc/bad-bitwise-operator": "error",
+    "oxc/no-barrel-file": "error",
+    "max-lines": [
+      "error",
+      {
+        "max": 1000
+      }
+    ],
+    "no-underscore-dangle": "allow",
+    "unicorn/text-encoding-identifier-case": "error",
+    "unicorn/no-abusive-eslint-disable": "error",
+    "unicorn/no-array-for-each": "error",
+    "unicorn/no-document-cookie": "error",
+    "unicorn/no-length-as-slice-end": "error",
+    "unicorn/no-magic-array-flat-depth": "error",
+    "unicorn/prefer-modern-math-apis": "error",
+    "unicorn/prefer-number-properties": "error",
+    "unicorn/catch-error-name": "error",
+    "unicorn/consistent-date-clone": "error",
+    "unicorn/consistent-existence-index-check": "error",
+    "unicorn/consistent-template-literal-escape": "error",
+    "unicorn/filename-case": [
+      "error",
+      {
+        "case": "camelCase"
+      }
+    ],
+    "unicorn/no-nested-ternary": "error",
+    "unicorn/error-message": "error",
+    "unicorn/number-literal-case": "error",
+    "unicorn/numeric-separators-style": "error",
+    "unicorn/prefer-array-index-of": "error",
+    "unicorn/prefer-bigint-literals": "error",
+    "unicorn/prefer-keyboard-event-key": "error",
+    "unicorn/prefer-negative-index": "error",
+    "unicorn/prefer-string-trim-start-end": "error",
+    "unicorn/require-array-join-separator": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.config.ts", "**/.vscode-test.mjs"],
+      "rules": {
+        "import/no-default-export": "off",
+        "unicorn/filename-case": "off"
+      }
+    },
+    {
+      "files": ["**/.vscode-test.mjs"],
+      "rules": {
+        "import/named": "off"
+      }
+    }
+  ]
+}

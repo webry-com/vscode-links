@@ -1,8 +1,8 @@
-export type ConfigType = ".ts" | ".js" | ".cjs" | ".mjs"
+export type ConfigType = '.ts' | '.js' | '.cjs' | '.mjs'
 
 export function createBaseConfig(configType: ConfigType): string {
   switch (configType) {
-    case ".ts":
+    case '.ts':
       return `
 import type { Config } from "vscl";
 
@@ -29,7 +29,7 @@ export default {
   ],
 } satisfies Config;
 `
-    case ".js":
+    case '.js':
       return `
 /** @type {import("vscl").Config} */
 export default {
@@ -55,7 +55,7 @@ export default {
   ],
 };
   `
-    case ".cjs":
+    case '.cjs':
       return `
 /** @type {import("vscl").Config} */
 exports.default = {
@@ -81,7 +81,7 @@ exports.default = {
   ],
 };
   `
-    case ".mjs":
+    case '.mjs':
       return `
 /** @type {import("vscl").Config} */
 export default {
@@ -108,4 +108,5 @@ export default {
 };
   `
   }
+  return ''
 }

@@ -10,4 +10,4 @@
 // 7. Default include, matches all files:    vscl-homepage
 // 8. Rule merged in via extends:            NOTE(sandbox-demo)
 
-export const placeholder = "only here so this file has content"
+export const placeholder = 'only here so this file has content'

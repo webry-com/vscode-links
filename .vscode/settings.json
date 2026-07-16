@@ -1,17 +1,17 @@
 {
-    "files.exclude": {
-        "out": false
-    },
-    "search.exclude": {
-        "out": true
-    },
-    "typescript.tsc.autoDetect": "off",
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "always"
-    },
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-    "editor.formatOnSave": true,
-    "[markdown]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+  "editor.formatOnSave": true,
+  "oxc.path.oxlint": "./node_modules/.bin/oxlint",
+  "oxc.path.oxfmt": "./node_modules/.bin/oxfmt",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit",
+    "source.format.oxc": "explicit"
+  },
+  "oxc.fixKind": "safe_fix_or_suggestion",
+  "files.exclude": {
+    "out": false
+  },
+  "search.exclude": {
+    "out": true
+  }
 }
