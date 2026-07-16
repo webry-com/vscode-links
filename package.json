@@ -30,13 +30,13 @@
     "lint": "oxlint .",
     "fmt": "oxfmt .",
     "dev": "node build.mjs",
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "pnpm run compile",
     "compile": "node build.mjs --minify",
     "test": "vscode-test",
     "pretest": "node build.mjs --tests",
-    "prepack": "vsce package --pre-release",
-    "prepubl": "vsce publish --pre-release",
-    "rel": "vsce publish"
+    "prepack": "vsce package --pre-release --no-dependencies",
+    "prepubl": "vsce publish --pre-release --no-dependencies",
+    "rel": "vsce publish --no-dependencies"
   },
   "dependencies": {
     "c12": "^3.3.4",
@@ -50,6 +50,7 @@
     "@types/vscode": "^1.90.0",
     "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^3.0.0",
+    "@vscode/vsce": "^3.9.2",
     "esbuild": "^0.28.1",
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",
