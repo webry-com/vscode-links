@@ -3,9 +3,10 @@ import { string, function as func, void as vod, promise, object, any, array, uni
 
 export const linkButtonSchema = object({
   title: string(),
-  action: func()
-    .args()
-    .returns(vod().or(promise(vod()))),
+  action: func({
+    input: [],
+    output: vod().or(promise(vod())),
+  }),
 }).or(
   object({
     title: string(),
@@ -34,8 +35,8 @@ export const configSchema = object({
         (val): val is RegExp | RegExp[] =>
           val instanceof RegExp || (Array.isArray(val) && val.length > 0 && val.every((v) => v instanceof RegExp)),
       ),
-      handle: func()
-        .args(
+      handle: func({
+        input: [
           object({
             linkText: string(),
             workspace: any(),
@@ -43,8 +44,9 @@ export const configSchema = object({
             reload: any(),
             log: any(),
           }),
-        )
-        .returns(handlerResponseSchema),
+        ],
+        output: handlerResponseSchema,
+      }),
     }),
   ),
 })

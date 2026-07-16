@@ -42,7 +42,7 @@
     "c12": "^1.11.1",
     "minimatch": "^10.2.5",
     "uuid": "^14.0.1",
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
