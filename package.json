@@ -62,6 +62,8 @@
   ],
   "scripts": {
     "watch": "tsc -watch -p ./",
+    "check": "tsc -p ./",
+    "dev": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --sourcemap",
     "vscode:prepublish": "npm run compile",
     "compile": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --minify",
     "test": "vscode-test",
@@ -80,7 +82,7 @@
     "esbuild": "^0.25.8",
     "globals": "^15.6.0",
     "prettier": "^3.3.2",
-    "typescript": "^5.3.3",
+    "typescript": "^7.0.2",
     "vscl": "^2.3.0"
   },
   "dependencies": {

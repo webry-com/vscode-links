@@ -3,21 +3,14 @@
     "./src/**/*.ts"
   ],
   "compilerOptions": {
-    "module": "Node16",
-    "target": "ES2022",
+    "target": "esnext",
     "outDir": "out",
     "lib": [
-      "ES2022"
+      "ESNext"
     ],
     "sourceMap": true,
     "rootDir": "src",
     "strict": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedParameters": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "skipLibCheck": true,
     "paths": {
       "ohash": [
