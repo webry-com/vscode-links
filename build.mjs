@@ -1,3 +1,5 @@
+import { globSync } from 'node:fs'
+
 import { build } from 'esbuild'
 
 // c12 pulls in jiti's ESM entry, whose lazy babel-transform loader calls
@@ -23,6 +25,7 @@ const jitiCjs = {
 }
 
 const minify = process.argv.includes('--minify')
+const tests = process.argv.includes('--tests')
 
 await build({
   entryPoints: ['src/extension.ts'],
@@ -35,3 +38,19 @@ await build({
   sourcemap: !minify,
   plugins: [jitiCjs],
 })
+
+if (tests) {
+  const testEntryPoints = globSync('src/test/**/*.test.ts')
+
+  await build({
+    entryPoints: testEntryPoints,
+    bundle: true,
+    outdir: 'out/test',
+    outbase: 'src/test',
+    external: ['vscode', 'mocha'],
+    format: 'cjs',
+    platform: 'node',
+    sourcemap: true,
+    plugins: [jitiCjs],
+  })
+}

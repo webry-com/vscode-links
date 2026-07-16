@@ -1,4 +1,6 @@
 {
+  "$schema": "https://unpkg.com/oxlint/configuration_schema.json",
+  "ignorePatterns": ["test-fixtures"],
   "plugins": ["import", "typescript", "unicorn"],
   "options": {
     "typeAware": true

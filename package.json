@@ -1,7 +1,7 @@
 {
   "name": "vsc-links",
   "displayName": "VSC Links",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "Create any links to files and websites based on patterns.",
   "categories": [
     "Other"
@@ -11,16 +11,16 @@
     "tool",
     "url"
   ],
-  "homepage": "https://github.com/webry-com/vsc-links#readme",
+  "homepage": "https://github.com/web-dev-sam/vsc-links#readme",
   "bugs": {
-    "url": "https://github.com/webry-com/vsc-links/issues",
+    "url": "https://github.com/web-dev-sam/vsc-links/issues",
     "email": "sam@webry.com"
   },
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "author": "Samuel Braun <sam@webry.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/webry-com/vsc-links"
+    "url": "git+https://github.com/web-dev-sam/vsc-links"
   },
   "publisher": "webry",
   "main": "./out/main.js",
@@ -33,7 +33,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "node build.mjs --minify",
     "test": "vscode-test",
-    "pretest": "npm run compile",
+    "pretest": "node build.mjs --tests",
     "prepack": "vsce package --pre-release",
     "prepubl": "vsce publish --pre-release",
     "rel": "vsce publish"
@@ -48,8 +48,8 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.13.3",
     "@types/vscode": "^1.90.0",
-    "@vscode/test-cli": "^0.0.8",
-    "@vscode/test-electron": "^2.3.9",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
     "esbuild": "^0.28.1",
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",

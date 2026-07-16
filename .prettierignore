@@ -1,0 +1,3 @@
+# Test fixtures are byte-exact inputs for the test suite (line/column
+# assertions, an intentionally broken config) — never format them.
+test-fixtures/
