@@ -1,6 +1,7 @@
 # VSCode Links
 
-![License: MIT License](https://img.shields.io/badge/License-mit-blue.svg)
+[![Tests](https://github.com/webry-com/vsc-links/actions/workflows/test.yml/badge.svg)](https://github.com/webry-com/vsc-links/actions/workflows/test.yml)
+![License: MIT License](https://img.shields.io/badge/License-MIT-blue.svg)
 
 - [Setup](#setup)
 - [Docs](https://vscl.webry.com/getting-started.html)

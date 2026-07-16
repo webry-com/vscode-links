@@ -1,4 +1,4 @@
-import { globSync } from 'node:fs'
+import { globSync, rmSync } from 'node:fs'
 
 import { build } from 'esbuild'
 
@@ -40,6 +40,10 @@ await build({
 })
 
 if (tests) {
+  // Renamed or deleted test files would otherwise leave stale bundles
+  // behind that vscode-test still picks up.
+  rmSync('out/test', { recursive: true, force: true })
+
   const testEntryPoints = globSync('src/test/**/*.test.ts')
 
   await build({
