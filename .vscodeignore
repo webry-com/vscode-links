@@ -1,14 +1,30 @@
-.vscode/**
-.vscode-test/**
+# Ship only the bundled entrypoint from out/
+out/**
+!out/main.js
+
+# Sources & build tooling
 src/**
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
-node_modules
-**/tsconfig.json
-**/.eslintrc.json
-**/*.map
-**/*.ts
-**/.vscode-test.*
+build.mjs
+tsconfig.json
 vsc-links.config.ts
 vsc-links.code-workspace
+.vscode/**
+.vscode-test/**
+**/.vscode-test.*
+.github/**
+.gitignore
+.oxfmtrc.json
+.oxlintrc.json
+.prettierignore
+
+# Tests & dev-only assets
+test-fixtures/**
+sandbox/**
+previews/**
+
+# Package manager files
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+**/*.map
+**/*.ts

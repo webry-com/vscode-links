@@ -1,7 +1,7 @@
 {
   "name": "vsc-links",
   "displayName": "VSC Links",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Create any links to files and websites based on patterns.",
   "categories": [
     "Other"
