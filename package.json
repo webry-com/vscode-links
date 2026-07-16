@@ -45,17 +45,17 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.6",
-    "@types/node": "18.x",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.13.3",
     "@types/vscode": "^1.90.0",
     "@vscode/test-cli": "^0.0.8",
     "@vscode/test-electron": "^2.3.9",
-    "esbuild": "^0.25.8",
+    "esbuild": "^0.28.1",
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",
     "oxlint-tsgolint": "^0.24.0",
     "typescript": "^7.0.2",
-    "vscl": "^2.3.0"
+    "vscl": "^2.3.1"
   },
   "contributes": {
     "commands": [
